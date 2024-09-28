@@ -58,7 +58,7 @@ as possible. Audits can show the presence of vulnerabilities **but not their abs
 
 | Severity      |                                                     Count |
 | :------------ | --------------------------------------------------------: |
-| High risk     |       1 |
+| High risk     |       0 |
 | Medium risk   |     1 |
 | Low risk      |       N/A |
 | Informational | N/A |
@@ -80,42 +80,6 @@ as possible. Audits can show the presence of vulnerabilities **but not their abs
 | /enum.sol |
 
 # Findings
-
-## High Severity
-
-### [H-01] 
-
-### **Incorrect Scaling in `_calculateClaimReward` When Using `calculateMintPowerBonus`**
-
-**Issue Description:**
-
-In the `_calculateClaimReward` function, the `calculateMintPowerBonus` function is called to compute the user's mint power bonus. However, there is a scaling issue related to how the bonus is processed, potentially leading to an incorrect final reward.
-
-The `calculateMintPowerBonus` function scales the result by `SCALING_FACTOR_1e18` for precision. However, when the bonus is used in `_calculateClaimReward`, it is divided only by `SCALING_FACTOR_1e7`, which accounts for the `mintPowerBonus` scaling, as stated in Natspec `//mintPowerBonus has scaling factor of 1e7, so divide by 1e7`
-
-this **does not account for the additional scaling introduced by `SCALING_FACTOR_1e18`** in the bonus calculation.
-
-
-### **Impact:**
-
-The `bonus` in `_calculateClaimReward` is divided only by `1e7`, but the scaling from `1e18` applied in `calculateMintPowerBonus` is not factored in. This causes the bonus to be over-scaled by a factor of `1e11` (`1e18 / 1e7`).
-
-### **POC**
-A working POC has been added [here](https://gist.github.com/Nabeel-javaid/bbdc4ed214ba2fcbefd69a572d4eaf1a)
-
-Here is the result of POC.
-
-<img width="883" alt="image" src="https://github.com/user-attachments/assets/42f4fbab-ad73-458f-bde8-fa88529090ba">
-
-
-
-### **Recommedation:**
-  
-  Modify the reward calculation in `_calculateClaimReward` to include division by both `SCALING_FACTOR_1e18` and `SCALING_FACTOR_1e7`:
-  
-  ```solidity
-  reward = uint256(userMintInfo.mintableLegacy) + (bonus / (SCALING_FACTOR_1e18 * SCALING_FACTOR_1e7));
-  ```
 
 ## Medium severity
 
