@@ -3,6 +3,10 @@
 A security review of the [Legacy](https://app.legacy.diamonds/) smart contract protocol was done by [0xepley](https://twitter.com/0xepley). \
 This audit report includes all the vulnerabilities, issues and code improvements found during the security review.
 
+# About Legacy
+
+Legacy is a decentralized smart contract protocol on Ethereum designed to be a digital store of value with Bitcoin-like tokenomics, offering a finite supply, self-minting rewards mechanism, and the potential to outperform Bitcoin, all while providing an inflation-resistant asset that empowers users to preserve and grow their wealth in a secure, decentralized, and energy-efficient manner.
+
 ## Disclaimer
 
 "Audits are a time, resource and expertise bound effort where trained experts evaluate smart
@@ -142,4 +146,8 @@ function burnLPTokens() external dailyDifficultyClock {
 
 #### **Recommended Mitigation Steps**
 It is recommended to use Multi-Sig wallet
+
+#### **Resolution**
+
+Users should be aware that the contract will be managed by an Externally Owned Account (EOA)
 
