@@ -113,6 +113,55 @@ This way, users will only be charged the exact amount needed to create the propo
 
 
 
+### [H-02] Treasury can not received the Locked NFT
+
+#### Description:
+In the `lockDeedNFT()` function, The NFT is being sent to `address(this)` which is treasury contract. The Transfer is being made using `transferFrom` 
+
+```solidity
+  IERC721(deedNFT).transferFrom(msg.sender, address(this), tokenId); 
+```
+but since the Treasury Contract do not have `OnERC721Received` function it will not received the NFT and the NFT will be lost in limbo.
+
+According to [openzeppelin docs](https://docs.openzeppelin.com/contracts/2.x/api/token/erc721#ERC721-transferFrom-address-address-uint256-):
+
+`transferFrom()`
+
+`Transfers the ownership of a given token ID to another address. Usage of this method is discouraged, use safeTransferFrom whenever possible. Requires the msg.sender to be the owner, approved, or operator.`
+
+As per the documentation of `EIP-721`:
+
+`A wallet/broker/auction application MUST implement the wallet interface if it will accept safe transfers.`
+
+Ref: https://eips.ethereum.org/EIPS/eip-721
+
+
+
+#### Recommendation:
+Call the safeTransferFrom() method instead of transferFrom() for NFT transfers. 
+```solidity
+        IERC721(deedNFT).safeTransferFrom(msg.sender, address(this), tokenId); 
+```
+
+
+```solidity
+require(
+    msg.value >= CREATE_PROPOSAL_COST,
+    "Amount too low for creating proposal"
+);
+
+// If user sends more than the required fee, refund the excess
+uint excessAmount = msg.value - CREATE_PROPOSAL_COST;
+if (excessAmount > 0) {
+    payable(msg.sender).call{value: excessAmount}(""); // Refund excess
+
+}
+```
+
+This way, users will only be charged the exact amount needed to create the proposal, and any extra ETH sent will be safely refunded to their wallet.
+
+
+
 ## Medium severity
 
 ### [M-01] Centralized Risk of Trusted Owner
