@@ -152,7 +152,7 @@ Call the safeTransferFrom() method instead of transferFrom() for NFT transfers.
 #### Description:
 The function `drainTreasury()` allows the contract owner to drain all ERC20 tokens and NFTs from the treasury to a company wallet. This introduces significant centralization risks as the owner has unrestricted control over the assets. If the private key of the owner or admin is compromised, or if there is any malicious intent, the entire treasury can be drained. This creates a single point of failure and is devastating for the platform's ecosystem.
 
-    ```solidity
+```solidity
     function drainTreasury() external onlyOwner {
         // Drain all ERC20 tokens to the admin wallet
         for (uint256 i = 0; i < assets.length; i++) {
@@ -167,7 +167,7 @@ The function `drainTreasury()` allows the contract owner to drain all ERC20 toke
         _transferAllNFTs(founderNFT);
         _transferAllNFTs(genesisNFT);
     }
-    ```
+```
 
 
 #### **Recommended Mitigation Steps**
