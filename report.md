@@ -144,49 +144,30 @@ Call the safeTransferFrom() method instead of transferFrom() for NFT transfers.
 ```
 
 
-```solidity
-require(
-    msg.value >= CREATE_PROPOSAL_COST,
-    "Amount too low for creating proposal"
-);
-
-// If user sends more than the required fee, refund the excess
-uint excessAmount = msg.value - CREATE_PROPOSAL_COST;
-if (excessAmount > 0) {
-    payable(msg.sender).call{value: excessAmount}(""); // Refund excess
-
-}
-```
-
-This way, users will only be charged the exact amount needed to create the proposal, and any extra ETH sent will be safely refunded to their wallet.
-
-
 
 ## Medium severity
 
-### [M-01] Centralized Risk of Trusted Owner
+### [M-01] Excessive Centralization Risk by Owner
 
-#### **Description**
-The contract owner is entrusted with sensitive operations such as changing important contract addresses and transferring ownership. This increases the risk of misuse, either due to malicious intent or compromise of the owner's account.
+#### Description:
+The function `drainTreasury()` allows the contract owner to drain all ERC20 tokens and NFTs from the treasury to a company wallet. This introduces significant centralization risks as the owner has unrestricted control over the assets. If the private key of the owner or admin is compromised, or if there is any malicious intent, the entire treasury can be drained. This creates a single point of failure and is devastating for the platform's ecosystem.
 
-```solidity
-
-  function setBuyAndBurnContractAddress(address contractAddress) external onlyOwner {
-
-  function setTitanXBuyAndBurnContractAddress(address contractAddress) external onlyOwner {
-
-  function renounceOwnership() public onlyOwner {
-
-  function transferOwnership(address newOwner) public onlyOwner {
-```
-
-MoreOver, The burnLPTokens() function grants the owner the ability to burn liquidity pool (LP) tokens held by the contract but it also opens a door for the owner where the owner can remove liquidity from Uniswap and steal the underlying assets (such as WETH and Legacy tokens).
-
-```solidity
-function burnLPTokens() external dailyDifficultyClock {
-    _burn(s_buyAndBurnAddress, balanceOf(s_buyAndBurnAddress));
-}
-```
+    ```solidity
+    function drainTreasury() external onlyOwner {
+        // Drain all ERC20 tokens to the admin wallet
+        for (uint256 i = 0; i < assets.length; i++) {
+            IERC20 token = IERC20(assets[i]);
+            uint256 balance = token.balanceOf(address(this));
+            if (balance > 0) {
+                token.transfer(companyWallet, balance); // Risky centralization
+            }
+        }
+        // Transfer all NFTs
+        _transferAllNFTs(deedNFT);
+        _transferAllNFTs(founderNFT);
+        _transferAllNFTs(genesisNFT);
+    }
+    ```
 
 
 #### **Recommended Mitigation Steps**
@@ -234,11 +215,26 @@ It is recommended both to add also a tolerance that compares the updatedAt retur
 
 ## Low severity
 
-### [M-01] Missing Events for Critical Functions
+### [L-01] Missing Events for Critical Functions
 
 #### Description:
 The contract lacks event emissions for critical functions, such as minting tokens and burning tokens during transfers. Events are crucial for providing transparency and facilitating off-chain monitoring of contract activities. Without events, it becomes challenging to track important state changes, like minting and burning, which could lead to a lack of accountability and hinder debugging efforts.
   
 #### Recommendation:
 Emit events in critical functions to log important actions:
+
+###  [L-02] Misleading Function Name
+
+
+#### Description:
+The function `getLockedNFTBalances()` returns the count of locked NFTs of different types (Deed, Founder, Genesis) for a user. However, the function name suggests that it returns "balances," which typically refers to token quantities or amounts rather than counts of NFTs. 
+
+```solidity
+function getLockedNFTBalances()
+```
+
+The function is actually returning the count of locked NFTs, not balances in the traditional sense of tokens.
+
+#### Recommendation:
+Rename the function to `getLockedNFTCount()` 
 
