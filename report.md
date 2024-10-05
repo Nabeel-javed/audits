@@ -3,9 +3,6 @@
 A security review of the MProfy-Dao-Web3 smart contract protocol was done by [0xepley](https://twitter.com/0xepley). \
 This audit report includes all the vulnerabilities, issues and code improvements found during the security review.
 
-# About Legacy
-
-Legacy is a decentralized smart contract protocol on Ethereum designed to be a digital store of value with Bitcoin-like tokenomics, offering a finite supply, self-minting rewards mechanism, and the potential to outperform Bitcoin, all while providing an inflation-resistant asset that empowers users to preserve and grow their wealth in a secure, decentralized, and energy-efficient manner.
 
 ## Disclaimer
 
@@ -59,8 +56,31 @@ as possible. Audits can show the presence of vulnerabilities **but not their abs
 | :------------ | --------------------------------------------------------: |
 | High risk     |       3 |
 | Medium risk   |     7 |
-| Low risk      |       4 |
+| Low risk      |       3 |
 | Gas Saving | 4 |
+
+### Issues Summary
+
+| Severity      | Title                                                                                                                                   |
+| :------------ | :------------------------------------------------------------------------------------------------------------------------------------- |
+| High Risk     | [H-01] Excessive Proposal Fee sent by user is lost                                                                                   |
+| High Risk     | [H-02] Unrestricted Access to Change Swap Router Address                                                                              |
+| High Risk     | [H-03] Treasury can not received the Locked NFT                                                                                       |
+| Medium Risk   | [M-01] Excessive Centralization Risk by Owner                                                                                         |
+| Medium Risk   | [M-02] Chainlink's `latestRoundData` might return stale or incorrect results                                                          |
+| Medium Risk   | [M-03] Missing deadline checks allow pending transactions to be maliciously executed                                                   |
+| Medium Risk   | [M-04] Hardcoding slippage to `0` can cause loss of funds                                                                             |
+| Medium Risk   | [M-05] Inadequate Handling of Treasury Points                                                                                         |
+| Medium Risk   | [M-06] Incorrect Placement of Total Deed Tokens Calculation for Each User                                                              |
+| Medium Risk   | [M-07] Transfer of ERC20 tokens will fail                                                                                             |
+| Low Risk      | [L-01] Missing Events for Critical Functions                                                                                          |
+| Low Risk      | [L-02] Use Ownable2Step instead of Ownable                                                                                             |
+| Low Risk      | [L-03] Unspecific Compiler Version Pragma                                                                                              |
+| Gas Saving    | [G-01] Nesting if-statements is cheaper than using &&                                                                                  |
+| Gas Saving    | [G-02] Cache array length outside of loop                                                                                              |
+| Gas Saving    | [G-03] Use Custom Errors                                                                                                               |
+| Gas Saving    | [G-04] Using `private` rather than `public` for constants, saves gas                                                                   |
+
 
 ### Scope
 
@@ -375,23 +395,7 @@ The contract lacks event emissions for critical functions, such as minting token
 #### Recommendation:
 Emit events in critical functions to log important actions:
 
-###  [L-02] Misleading Function Name
-
-
-#### Description:
-The function `getLockedNFTBalances()` returns the count of locked NFTs of different types (Deed, Founder, Genesis) for a user. However, the function name suggests that it returns "balances," which typically refers to token quantities or amounts rather than counts of NFTs. 
-
-```solidity
-function getLockedNFTBalances()
-```
-
-The function is actually returning the count of locked NFTs, not balances in the traditional sense of tokens.
-
-#### Recommendation:
-Rename the function to `getLockedNFTCount()` 
-
-
-###  [L-03] Use Ownable2Step instead of Ownable
+###  [L-02] Use Ownable2Step instead of Ownable
 
 #### Description:
 The `Ownable2Step` pattern involves a two-step process where the current owner proposes a new owner, and the new owner must accept the proposal to complete the transfer. This mechanism requires active participation from both parties, significantly reducing the risk of unintended or unauthorized ownership changes.
@@ -402,7 +406,7 @@ use `Ownable2Step` instead of `Ownable`
 contract Treasury is Ownable2Step, ReentrancyGuard {
 ```
 
-###  [L-04] Unspecific Compiler Version Pragma
+###  [L-03] Unspecific Compiler Version Pragma
 
 #### Description:
 Avoid floating pragmas for non-library contracts.
