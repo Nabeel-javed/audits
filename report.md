@@ -58,9 +58,9 @@ as possible. Audits can show the presence of vulnerabilities **but not their abs
 | Severity      |                                                     Count |
 | :------------ | --------------------------------------------------------: |
 | High risk     |       3 |
-| Medium risk   |     1 |
-| Low risk      |       N/A |
-| Informational | N/A |
+| Medium risk   |     7 |
+| Low risk      |       4 |
+| Gas Saving | 4 |
 
 ### Scope
 
@@ -260,7 +260,7 @@ Introduce a deadline parameter to all functions which potentially perform a swap
 
 
 
-### [M-04] Missing deadline checks allow pending transactions to be maliciously executed
+### [M-04] Hardcoding slippage to `0` can cause loss of funds
 
 #### Description:
 
@@ -295,7 +295,7 @@ It is recommended to consider slippage when calculating the minimum amount of to
 
 
 
-### [M-05] Inadequate Handling of Treasury Points**
+### [M-05] Inadequate Handling of Treasury Points
 
 **Description**:  
 The `totalTreasuryPoints` is updated based on the total deposit amount (`totalAmount`). However, the contract doesn't account for individual contributions when assigning treasury points. If users are depositing different amounts, this approach does not fairly distribute the treasury points based on their actual contributions. This could lead to a disproportionate allocation of treasury points, causing misalignment.
@@ -309,7 +309,7 @@ The `totalTreasuryPoints` is updated based on the total deposit amount (`totalAm
 Treasury points should be allocated on a per-user basis, proportionate to their individual deposit amounts. Update the code inside the loop to calculate and assign treasury points for each user:
 
 
-### [M-06]  Incorrect Placement of Total Deed Tokens Calculation for Each User**
+### [M-06]  Incorrect Placement of Total Deed Tokens Calculation for Each User
 
 
 **Description**:  
@@ -342,7 +342,7 @@ User memory newUserDeposit = User({
 ```
 
 
-### [M-07] Transfer of ERC20 tokens will fail**
+### [M-07] Transfer of ERC20 tokens will fail
 
 **Description**:  
 The contract is attempting to transfer `assets[0]` from the msg.sender to the treasury, but there is no approval process in place to ensure that the contract can spend the user's tokens. The function does not request approval from the user before calling:
