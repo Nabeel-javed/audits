@@ -57,7 +57,7 @@ as possible. Audits can show the presence of vulnerabilities **but not their abs
 
 | Severity      |                                                     Count |
 | :------------ | --------------------------------------------------------: |
-| High risk     |       0 |
+| High risk     |       3 |
 | Medium risk   |     1 |
 | Low risk      |       N/A |
 | Informational | N/A |
@@ -143,7 +143,7 @@ It is recommended to restrict this function explicitly to the owner that only au
 
 
 
-### [H-02] Treasury can not received the Locked NFT
+### [H-03] Treasury can not received the Locked NFT
 
 #### Description:
 In the `lockDeedNFT()` function, The NFT is being sent to `address(this)` which is treasury contract. The Transfer is being made using `transferFrom` 
