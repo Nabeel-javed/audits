@@ -112,6 +112,36 @@ if (excessAmount > 0) {
 This way, users will only be charged the exact amount needed to create the proposal, and any extra ETH sent will be safely refunded to their wallet.
 
 
+### [H-02] Unrestricted Access to Change Swap Router Address
+
+
+#### Description:
+The `setSwapRouter` function allows **anyone** to change the swap router address (`SWAP_ROUTER_02`) without any restrictions. This is a critical issue, as a malicious actor could change the router to their own contract, enabling them to steal all user's funds.
+
+
+```solidity
+function setSwapRouter(address _router) public { 
+    SWAP_ROUTER_02 = _router; // Unrestricted access to modify critical contract address
+}
+```
+
+#### Recommendations:
+
+It is recommended to restrict this function explicitly to the owner that only authorized person can change the router address.
+
+```solidity
+   modifier onlyOwner() {
+       require(msg.sender == owner, "Caller is not the owner");
+       _;
+   }
+
+   function setSwapRouter(address _router) public onlyOwner {
+       SWAP_ROUTER_02 = _router;
+   }
+ ```
+
+
+
 
 ### [H-02] Treasury can not received the Locked NFT
 
@@ -211,6 +241,48 @@ only the `answer` is used in the `getPrice()` implementation. The retrieved pric
 It is recommended both to add also a tolerance that compares the updatedAt return timestamp from latestRoundData() with the current block timestamp and ensure that the priceFeed is being updated with the required frequency.
 
 
+
+### [M-03] Missing deadline checks allow pending transactions to be maliciously executed
+
+#### Description:
+AMMs provide their users with an option to limit the execution of their pending actions, such as swaps or adding and removing liquidity. The most common solution is to include a deadline timestamp as a parameter (for example see [Uniswap V2](https://github.com/Uniswap/v2-periphery/blob/0335e8f7e1bd1e8d8329fd300aea2ef2f36dd19f/contracts/UniswapV2Router02.sol#L229) and [Uniswap V3](https://github.com/Uniswap/v3-periphery/blob/6cce88e63e176af1ddb6cc56e029110289622317/contracts/SwapRouter.sol#L119)). If such an option is not present, users can unknowingly perform bad trades:
+
+1): Alice wants to swap `100 tokens` for `1 ETH` and later sell the `1 ETH` for `1000 DAI`.
+
+2): The transaction is submitted to the mempool, however, Alice chose a transaction fee that is `too` low for miners to be interested in including her transaction in a block. The transaction stays pending in the mempool for extended periods, which could be hours, days, weeks, or even longer.
+
+3): When the average gas fee dropped far enough for Alice's transaction to become interesting again for miners to include it, her swap will be executed. In the meantime, the price of ETH could have drastically changed. She will still get 1 ETH but the DAI value of that output might be significantly lower. She has unknowingly performed a bad trade due to the pending transaction she forgot about.
+
+
+### Recommended Mitigation Steps
+
+Introduce a deadline parameter to all functions which potentially perform a swap on the user's behalf.
+
+
+
+### [M-04] Missing deadline checks allow pending transactions to be maliciously executed
+
+#### Description:
+
+```solidity
+IV3SwapRouter.ExactInputSingleParams memory params = IV3SwapRouter
+            .ExactInputSingleParams({
+                tokenIn: tokenIn,
+                tokenOut: tokenOut,
+                fee: feeTier,
+                recipient: address(this), 
+                amountIn: amountIn,
+                amountOutMinimum: 0, 
+                sqrtPriceLimitX96: 0
+            });
+```
+The `swapExactInputSingle()` function in `treasury.sol` is performing the swap from uniswap pool. In this function `0` value is assigned to `amountOutMinimum` argument which is used for slippage tolerance. 0 value here essentially means 100% slippage tolerance. This is a very easy target for MEV and bots to do a flash loan sandwich attack. 
+
+These occur when MEV algorithms purchase significant amounts of the asset involved in the swap. This action drives the price of the asset up before the swap occurs. These algorithms then sell the asset at this higher price, making a profit. As a result, the user conducting the swap might end up paying more for the asset than they initially expected
+
+### Recommended Mitigation Steps
+
+It is recommended to consider slippage when calculating the minimum amount of tokens that should receive.
 
 
 ## Low severity
