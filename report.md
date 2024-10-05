@@ -86,7 +86,7 @@ as possible. Audits can show the presence of vulnerabilities **but not their abs
 
 | File                                                                                                    | 
 | :------------------------------------------------------------------------------------------------------ | 
-| _Contracts (8)_                                                  |
+| _Contracts (5)_                                                  |
 | /Deed.sol |
 | /FounderNFT.sol |
 | /Governance.sol |
