@@ -285,6 +285,86 @@ These occur when MEV algorithms purchase significant amounts of the asset involv
 It is recommended to consider slippage when calculating the minimum amount of tokens that should receive.
 
 
+
+
+
+
+
+
+
+
+
+
+### [M-05] Inadequate Handling of Treasury Points**
+
+**Description**:  
+The `totalTreasuryPoints` is updated based on the total deposit amount (`totalAmount`). However, the contract doesn't account for individual contributions when assigning treasury points. If users are depositing different amounts, this approach does not fairly distribute the treasury points based on their actual contributions. This could lead to a disproportionate allocation of treasury points, causing misalignment.
+
+```solidity
+ totalTreasuryPoints += totalAmount;
+```
+
+
+**Recommendation**:  
+Treasury points should be allocated on a per-user basis, proportionate to their individual deposit amounts. Update the code inside the loop to calculate and assign treasury points for each user:
+
+
+### [M-06]  Incorrect Placement of Total Deed Tokens Calculation for Each User**
+
+
+**Description**:  
+The `amountToMint` represents the total Deed tokens to be minted for the entire deposit. However, in the current implementation, the same `amountToMint` is assigned to each user, regardless of their individual contributions. This leads to an incorrect distribution of Deed tokens, as each user should receive Deed tokens proportional to the amount they deposited.
+
+```solidity
+uint256 amountToMint = (totalAmount * DEED_EMISSION_RATE * 10 ** 8) / (10 ** 18);
+```
+
+```solidity
+for (uint256 i = 0; i < users.length; i++) {
+            User memory newUserDeposit = User({
+                treasuryDeposit: usdcAmounts[i],
+                firstDepositTime: block.timestamp,
+                deedMint: amountToMint
+            });
+```
+If Deed tokens are assigned equally to all users, it will result in unfair token distribution. Users who contributed more should receive more tokens, and this misallocation can distort rewards or token ownership.
+
+**Recommendation**:  
+Calculate the Deed tokens for each user individually based on their contribution, and assign the correct amount in the loop:
+
+```solidity
+uint256 userAmountToMint = (usdcAmounts[i] * DEED_EMISSION_RATE * 10 ** 8) / (10 ** 18); // Proportional calculation
+User memory newUserDeposit = User({
+    treasuryDeposit: usdcAmounts[i],
+    firstDepositTime: block.timestamp,
+    deedMint: userAmountToMint // Assign based on individual deposit
+});
+```
+
+
+### [M-07] Transfer of ERC20 tokens will fail**
+
+**Description**:  
+The contract is attempting to transfer `assets[0]` from the msg.sender to the treasury, but there is no approval process in place to ensure that the contract can spend the user's tokens. The function does not request approval from the user before calling:
+
+```solidity
+        IDeedToken(deedToken).mintForTreasury(address(this), amountToMint);
+        //need approval of user
+        bool success = IERC20(assets[0]).transferFrom(msg.sender,address(this),totalAmount);
+
+        require(success, "Transfer to treasury failed");
+```
+
+Since the contract is not taking the approval of assets from the user, the function will most probably fail everytime unless user itself give the persmission to the contract(which is not likely).
+
+`NOTE: In the natspec it is written that "//need approval of user " but the code isn't asking for approval"`
+
+**Recommendation**:  
+It is recommended to ask for approval from user to spend their token before trying to transfer it
+
+
+
+
 ## Low severity
 
 ### [L-01] Missing Events for Critical Functions
