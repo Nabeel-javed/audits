@@ -200,7 +200,7 @@ The function `drainTreasury()` allows the contract owner to drain all ERC20 toke
 ```
 
 
-#### **Recommended Mitigation Steps**
+#### **Recommendation**
 It is recommended to use Multi-Sig wallet
 
 
@@ -237,7 +237,7 @@ function latestRoundData() external view
 only the `answer` is used in the `getPrice()` implementation. The retrieved price of the priceFeed can be outdated and used anyways as a valid data because no timestamp tolerance of the update source time is checked while using the return parameters of feed.latestRoundData().
 
 
-#### **Recommended Mitigation Steps**
+#### **Recommendation**
 It is recommended both to add also a tolerance that compares the updatedAt return timestamp from latestRoundData() with the current block timestamp and ensure that the priceFeed is being updated with the required frequency.
 
 
@@ -254,7 +254,7 @@ AMMs provide their users with an option to limit the execution of their pending 
 3): When the average gas fee dropped far enough for Alice's transaction to become interesting again for miners to include it, her swap will be executed. In the meantime, the price of ETH could have drastically changed. She will still get 1 ETH but the DAI value of that output might be significantly lower. She has unknowingly performed a bad trade due to the pending transaction she forgot about.
 
 
-### Recommended Mitigation Steps
+### Recommendation
 
 Introduce a deadline parameter to all functions which potentially perform a swap on the user's behalf.
 
@@ -280,7 +280,7 @@ The `swapExactInputSingle()` function in `treasury.sol` is performing the swap f
 
 These occur when MEV algorithms purchase significant amounts of the asset involved in the swap. This action drives the price of the asset up before the swap occurs. These algorithms then sell the asset at this higher price, making a profit. As a result, the user conducting the swap might end up paying more for the asset than they initially expected
 
-### Recommended Mitigation Steps
+### Recommendation
 
 It is recommended to consider slippage when calculating the minimum amount of tokens that should receive.
 
