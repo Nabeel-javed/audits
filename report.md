@@ -224,7 +224,7 @@ Assume `assets[i]` is USDC, and after swapping USDC for DAI, the value is stored
 If the function continues using `assets[i]`, it will be trying to transfer DAI amounts (`usershareInDai`) from the non-DAI token contract, which is incorrect and will likely fail because `assets[i]` does not hold DAI.
 
 #### Recommendation:
-The correct contract for transferring DAI is `assets[0]` (assuming `assets[0]` is the DAI token). Thus, the transfer line should be updated as follows:
+The correct contract for transferring DAI is `assets[0]`. Thus, the transfer line should be updated as follows:
 
 ```solidity
 IERC20(assets[0]).transfer(companyWallet, usershareInDai);
