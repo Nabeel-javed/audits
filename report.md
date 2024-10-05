@@ -193,6 +193,44 @@ Call the safeTransferFrom() method instead of transferFrom() for NFT transfers.
         IERC721(deedNFT).safeTransferFrom(msg.sender, address(this), tokenId); 
 ```
 
+### [H-04] Incorrect Transfer of Non-DAI Assets
+
+#### Description:
+In the `withdraw()` function, non-DAI assets are swapped for DAI using the `swapExactInputSingle` function. After swapping, the code intends to transfer the resulting DAI (referred to as `usershareInDai`) to the `companyWallet`. 
+
+```solidity
+else {
+                uint256 usershareInDai = swapExactInputSingle(
+                    assets[i],
+                    assets[0],
+                    userShare,
+                    poolFeeTier[i - 1]
+                );
+                // q should transfer only usershare or userShareInDai
+                IERC20(assets[i]).transfer(companyWallet, usershareInDai);
+            }
+```
+However, the transfer code is incorrectly written:
+
+```solidity
+IERC20(assets[i]).transfer(companyWallet, usershareInDai);
+```
+
+The above line is transferring tokens from the `assets[i]` contract (i.e., the non-DAI token), but after the swap, the variable `usershareInDai` represents an amount in **DAI** (not the original asset). This means that after the asset has been swapped into DAI, the transfer should be using the **DAI token contract** (`assets[0]`), not `assets[i]`.
+
+Assume `assets[i]` is USDC, and after swapping USDC for DAI, the value is stored in `usershareInDai`. This amount is in DAI, but the original code tries to transfer it from the USDC contract (`assets[i]`), which does not have DAI tokens. Instead, the transfer should be done through the DAI contract (`assets[0]`).
+
+
+If the function continues using `assets[i]`, it will be trying to transfer DAI amounts (`usershareInDai`) from the non-DAI token contract, which is incorrect and will likely fail because `assets[i]` does not hold DAI.
+
+#### Recommendation:
+The correct contract for transferring DAI is `assets[0]` (assuming `assets[0]` is the DAI token). Thus, the transfer line should be updated as follows:
+
+```solidity
+IERC20(assets[0]).transfer(companyWallet, usershareInDai);
+```
+
+
 
 
 ## Medium severity
