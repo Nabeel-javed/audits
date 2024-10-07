@@ -163,7 +163,8 @@ It is recommended to restrict this function explicitly to the owner that only au
    }
  ```
 
-
+#### Resolution:
+Solved
 
 
 ### [H-03] Treasury can not received the Locked NFT
