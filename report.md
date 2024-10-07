@@ -235,7 +235,8 @@ IERC20(assets[0]).transfer(companyWallet, usershareInDai);
 ```
 
 
-
+#### Resolution:
+Solved
 
 ## Medium severity
 
@@ -403,6 +404,8 @@ User memory newUserDeposit = User({
 });
 ```
 
+#### Resolution:
+Solved
 
 ### [M-07] Transfer of ERC20 tokens will fail
 
@@ -447,6 +450,8 @@ use `Ownable2Step` instead of `Ownable`
 ```solidity
 contract Treasury is Ownable2Step, ReentrancyGuard {
 ```
+#### Resolution
+Solved
 
 ###  [L-03] Unspecific Compiler Version Pragma
 
