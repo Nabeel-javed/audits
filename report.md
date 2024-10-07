@@ -69,6 +69,7 @@ Mprofy DAO is a decentralized platform designed to empower the existing Mprofy c
 | High Risk     | [H-01] Excessive Proposal Fee sent by user is lost                                                                                   |
 | High Risk     | [H-02] Unrestricted Access to Change Swap Router Address                                                                              |
 | High Risk     | [H-03] Treasury can not received the Locked NFT                                                                                       |
+| High Risk     | [H-04] Incorrect Transfer of Non-DAI Assets                                                                                      |
 | Medium Risk   | [M-01] Excessive Centralization Risk by Owner                                                                                         |
 | Medium Risk   | [M-02] Chainlink's `latestRoundData` might return stale or incorrect results                                                          |
 | Medium Risk   | [M-03] Missing deadline checks allow pending transactions to be maliciously executed                                                   |
