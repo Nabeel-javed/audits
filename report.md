@@ -72,11 +72,9 @@ Mprofy DAO is a decentralized platform designed to empower the existing Mprofy c
 | High Risk     | [H-04] Incorrect Transfer of Non-DAI Assets                                                                                      |
 | Medium Risk   | [M-01] Excessive Centralization Risk by Owner                                                                                         |
 | Medium Risk   | [M-02] Chainlink's `latestRoundData` might return stale or incorrect results                                                          |
-| Medium Risk   | [M-03] Missing deadline checks allow pending transactions to be maliciously executed                                                   |
-| Medium Risk   | [M-04] Hardcoding slippage to `0` can cause loss of funds                                                                             |
-| Medium Risk   | [M-05] Inadequate Handling of Treasury Points                                                                                         |
-| Medium Risk   | [M-06] Incorrect Placement of Total Deed Tokens Calculation for Each User                                                              |
-| Medium Risk   | [M-07] Transfer of ERC20 tokens will fail                                                                                             |
+| Medium Risk   | [M-03] Hardcoding slippage to `0` can cause loss of funds                                                                             |
+| Medium Risk   | [M-04] Incorrect Placement of Total Deed Tokens Calculation for Each User                                                              |
+| Medium Risk   | [M-05] Transfer of ERC20 tokens will fail                                                             |
 | Low Risk      | [L-01] Missing Events for Critical Functions                                                                                          |
 | Low Risk      | [L-02] Use Ownable2Step instead of Ownable                                                                                             |
 | Low Risk      | [L-03] Unspecific Compiler Version Pragma                                                                                              |
@@ -198,6 +196,10 @@ Call the safeTransferFrom() method instead of transferFrom() for NFT transfers.
         IERC721(deedNFT).safeTransferFrom(msg.sender, address(this), tokenId); 
 ```
 
+#### Resolution:
+Solved
+
+
 ### [H-04] Incorrect Transfer of Non-DAI Assets
 
 #### Description:
@@ -308,25 +310,7 @@ It is recommended both to add also a tolerance that compares the updatedAt retur
 
 
 
-### [M-03] Missing deadline checks allow pending transactions to be maliciously executed
-
-#### Description:
-AMMs provide their users with an option to limit the execution of their pending actions, such as swaps or adding and removing liquidity. The most common solution is to include a deadline timestamp as a parameter (for example see [Uniswap V2](https://github.com/Uniswap/v2-periphery/blob/0335e8f7e1bd1e8d8329fd300aea2ef2f36dd19f/contracts/UniswapV2Router02.sol#L229) and [Uniswap V3](https://github.com/Uniswap/v3-periphery/blob/6cce88e63e176af1ddb6cc56e029110289622317/contracts/SwapRouter.sol#L119)). If such an option is not present, users can unknowingly perform bad trades:
-
-1): Alice wants to swap `100 tokens` for `1 ETH` and later sell the `1 ETH` for `1000 DAI`.
-
-2): The transaction is submitted to the mempool, however, Alice chose a transaction fee that is `too` low for miners to be interested in including her transaction in a block. The transaction stays pending in the mempool for extended periods, which could be hours, days, weeks, or even longer.
-
-3): When the average gas fee dropped far enough for Alice's transaction to become interesting again for miners to include it, her swap will be executed. In the meantime, the price of ETH could have drastically changed. She will still get 1 ETH but the DAI value of that output might be significantly lower. She has unknowingly performed a bad trade due to the pending transaction she forgot about.
-
-
-### Recommendation
-
-Introduce a deadline parameter to all functions which potentially perform a swap on the user's behalf.
-
-
-
-### [M-04] Hardcoding slippage to `0` can cause loss of funds
+### [M-03] Hardcoding slippage to `0` can cause loss of funds
 
 #### Description:
 
@@ -353,29 +337,15 @@ It is recommended to consider slippage when calculating the minimum amount of to
 
 
 
+#### Resolution:
+Solved
 
 
 
 
 
 
-
-
-### [M-05] Inadequate Handling of Treasury Points
-
-**Description**:  
-The `totalTreasuryPoints` is updated based on the total deposit amount (`totalAmount`). However, the contract doesn't account for individual contributions when assigning treasury points. If users are depositing different amounts, this approach does not fairly distribute the treasury points based on their actual contributions. This could lead to a disproportionate allocation of treasury points, causing misalignment.
-
-```solidity
- totalTreasuryPoints += totalAmount;
-```
-
-
-**Recommendation**:  
-Treasury points should be allocated on a per-user basis, proportionate to their individual deposit amounts. Update the code inside the loop to calculate and assign treasury points for each user:
-
-
-### [M-06]  Incorrect Placement of Total Deed Tokens Calculation for Each User
+### [M-04]  Incorrect Placement of Total Deed Tokens Calculation for Each User
 
 
 **Description**:  
@@ -410,7 +380,7 @@ User memory newUserDeposit = User({
 #### Resolution:
 Solved
 
-### [M-07] Transfer of ERC20 tokens will fail
+### [M-05] Transfer of ERC20 tokens will fail
 
 **Description**:  
 The contract is attempting to transfer `assets[0]` from the msg.sender to the treasury, but there is no approval process in place to ensure that the contract can spend the user's tokens. The function does not request approval from the user before calling:
@@ -431,6 +401,8 @@ Since the contract is not taking the approval of assets from the user, the funct
 It is recommended to ask for approval from user to spend their token before trying to transfer it
 
 
+#### Resolution:
+Solved
 
 
 ## Low severity
@@ -443,6 +415,10 @@ The contract lacks event emissions for critical functions, such as minting token
 #### Recommendation:
 Emit events in critical functions to log important actions:
 
+#### Resolution:
+Solved
+
+
 ###  [L-02] Use Ownable2Step instead of Ownable
 
 #### Description:
@@ -454,7 +430,7 @@ use `Ownable2Step` instead of `Ownable`
 contract Treasury is Ownable2Step, ReentrancyGuard {
 ```
 #### Resolution
-Solved
+Acknowledge
 
 ###  [L-03] Unspecific Compiler Version Pragma
 
@@ -486,6 +462,8 @@ Nesting if-statements avoids the stack operations of setting up and using an ext
 
 There are total 11 instances of this issue
 
+#### Resolution:
+Acknowledge
 
 
 ### [G-02] Cache array length outside of loop
@@ -494,6 +472,9 @@ There are total 11 instances of this issue
 If not cached, the solidity compiler will always read the length of the array during each iteration. That is, if it is a storage array, this is an extra sload operation (100 additional extra gas for each iteration except for the first) and if it is a memory array, this is an extra mload operation (3 additional gas for each iteration except for the first).
 
 There are total 23 instances of this issue
+
+#### Resolution:
+Solved
 
 
 ### [G-03] Use Custom Errors
@@ -504,6 +485,9 @@ Instead of using error strings, to reduce deployment and runtime cost, you shoul
 
 There are total 62 instances of this issue
 
+#### Resolution:
+Acknowledge
+
 
 ### [G-04] Using `private` rather than `public` for constants, saves gas
 
@@ -511,3 +495,7 @@ There are total 62 instances of this issue
 If needed, the values can be read from the verified contract source code, or if there are multiple values there can be a single getter function that [returns a tuple](https://github.com/code-423n4/2022-08-frax/blob/90f55a9ce4e25bceed3a74290b854341d8de6afa/src/contracts/FraxlendPair.sol#L156-L178) of the values of all currently-public constants. Saves **3406-3606 gas** in deployment gas due to the compiler not having to create non-payable getter functions for deployment calldata, not having to store the bytes of the value outside of where it's used, and not adding another entry to the method ID table
 
 There are total 10 instances of this issue
+
+#### Resolution:
+Acknowledge
+
