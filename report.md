@@ -58,7 +58,7 @@ Mprofy DAO is a decentralized platform designed to empower the existing Mprofy c
 | Severity      |                                                     Count |
 | :------------ | --------------------------------------------------------: |
 | High risk     |       4 |
-| Medium risk   |     7 |
+| Medium risk   |     5 |
 | Low risk      |       3 |
 | Gas Saving | 4 |
 
