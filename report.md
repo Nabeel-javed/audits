@@ -133,6 +133,8 @@ if (excessAmount > 0) {
 
 This way, users will only be charged the exact amount needed to create the proposal, and any extra ETH sent will be safely refunded to their wallet.
 
+#### Resolution:
+Solved 
 
 ### [H-02] Unrestricted Access to Change Swap Router Address
 
@@ -309,6 +311,8 @@ only the `answer` is used in the `getPrice()` implementation. The retrieved pric
 It is recommended both to add also a tolerance that compares the updatedAt return timestamp from latestRoundData() with the current block timestamp and ensure that the priceFeed is being updated with the required frequency.
 
 
+#### Resolution:
+Solved
 
 ### [M-03] Hardcoding slippage to `0` can cause loss of funds
 
@@ -335,14 +339,8 @@ These occur when MEV algorithms purchase significant amounts of the asset involv
 It is recommended to consider slippage when calculating the minimum amount of tokens that should receive.
 
 
-
-
 #### Resolution:
 Solved
-
-
-
-
 
 
 ### [M-04]  Incorrect Placement of Total Deed Tokens Calculation for Each User
@@ -451,6 +449,10 @@ A known vulnerable compiler version may accidentally be selected or security too
 
 #### Recommendation:
 It is recommended to pin to a concrete compiler version.
+
+
+#### Resolution:
+Acknowledged
 
 
 ## Gas Saving
