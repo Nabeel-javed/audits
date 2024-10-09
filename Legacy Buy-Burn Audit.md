@@ -1,6 +1,6 @@
-# MProfy-Dao-Web3 Security Review
+# Legacy Buy-Burn Security Review
 
-A security review of the MProfy-Dao-Web3 smart contract protocol was done by [0xepley](https://twitter.com/0xepley). \
+A security review of the Legacy Buy-Burn smart contract protocol was done by [0xepley](https://twitter.com/0xepley). \
 This audit report includes all the vulnerabilities, issues and code improvements found during the security review.
 
 
@@ -47,8 +47,8 @@ Mprofy DAO is a decentralized platform designed to empower the existing Mprofy c
 
 |               |                                                                                              |
 | :------------ | :------------------------------------------------------------------------------------------- |
-| Project Name  | MProfy-Dao-Web3                                                                                       |
-| Repository    | https://github.com/DhruvGodambe/mprofy-dao-web3  
+| Project Name  | Legacy Buy-Burn                                                                                     |
+| Repository    | https://github.com/devdomsos/legacy-smart-contracts-audit/  
 | Methods       | Static + Manual review                                                                                |
 |               |
 
