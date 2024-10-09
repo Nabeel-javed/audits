@@ -10,10 +10,12 @@ This audit report includes all the vulnerabilities, issues and code improvements
 contracts using a combination of automated and manual techniques to find as many vulnerabilities
 as possible. Audits can show the presence of vulnerabilities **but not their absence**."
 
+\- Secureum
+
 ## About Mprofy
 Mprofy DAO is a decentralized platform designed to empower the existing Mprofy community, facilitating their transition from Web2 to Web3. The DAO enables users to actively participate in the governance of the platform by voting on and submitting proposals. If a proposal is approved, it can receive funding from the Mprofy treasury, which holds a variety of crypto assets such as USDT, DAI, WETH, WBTC, and more. These assets are commissions earned by Mprofy users and contributed to the treasury. Additionally, the treasury includes the Deed token, Mprofy's native platform token, further driving the ecosystem's growth and sustainability.
 
-\- Secureum
+
 
 ## Risk classification
 
