@@ -88,7 +88,6 @@ as possible. Audits can show the presence of vulnerabilities **but not their abs
 In the `buynBurn` function the code is using the check `require(msg.sender == tx.origin)` to prevent contract accounts from calling the function. While this approach ensures that only Externally Owned Accounts (EOAs) can call the function, this check is not future-proof due to **EIP-3074** (a proposed Ethereum Improvement Proposal).
 
 This [EIP](https://eips.ethereum.org/EIPS/eip-3074#abstract) introduces two EVM instructions **AUTH** and **AUTHCALL**. The first sets a context variable authorized based on an ECDSA signature. The second sends a call as the authorized account. **This essentially delegates control of the externally owned account (EOA) to a smart contract.**
-Once implemented, it may enable contracts to bypass this `tx.origin` check, invalidating the assumption that `msg.sender == tx.origin` is always an EOA. 
 
 **Recommendation**:
 
