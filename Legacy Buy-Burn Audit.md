@@ -65,14 +65,14 @@ as possible. Audits can show the presence of vulnerabilities **but not their abs
 
 | Severity      | Title                                                                                                                                   |
 | :------------ | :------------------------------------------------------------------------------------------------------------------------------------- |
-| Medium Risk   | [M-05] onlyEOAEx modifier that ensures call is from EOA might not hold true in the future                                                             |
+| Medium Risk   | [M-01] onlyEOAEx modifier that ensures call is from EOA might not hold true in the future                                                             |
 
 
 ### Scope
 
 | File                                                                                                    | 
 | :------------------------------------------------------------------------------------------------------ | 
-| _Contracts (5)_                                                  |
+| _Contracts (2)_                                                  |
 | /BuyAndBurn.sol |
 | /MockBuyAndBurn.sol |
 
@@ -81,15 +81,17 @@ as possible. Audits can show the presence of vulnerabilities **but not their abs
 
 ## Medium severity
 
-### [M-01] onlyEOAEx modifier that ensures call is from EOA might not hold true in the future
+### [M-01] `Require` condition that ensures call is from EOA might not hold true in the future
 
 **Description**:  
+
 In the `buynBurn` function the code is using the check `require(msg.sender == tx.origin)` to prevent contract accounts from calling the function. While this approach ensures that only Externally Owned Accounts (EOAs) can call the function, this check is not future-proof due to **EIP-3074** (a proposed Ethereum Improvement Proposal).
 
 This [EIP](https://eips.ethereum.org/EIPS/eip-3074#abstract) introduces two EVM instructions **AUTH** and **AUTHCALL**. The first sets a context variable authorized based on an ECDSA signature. The second sends a call as the authorized account. **This essentially delegates control of the externally owned account (EOA) to a smart contract.**
 Once implemented, it may enable contracts to bypass this `tx.origin` check, invalidating the assumption that `msg.sender == tx.origin` is always an EOA. 
 
 **Recommendation**:
+
 You can use `isContract()` modifier by openzeppelin but there is also a catch with that: If the function is called in the constructor. `isContract()` checks for the code length, but during construction code length is 0. So this check can be bypassed.
 
 Moreover If you want to restrict a Bot calling this fuction multiple time we can place a `require` condition that can make sure there is a gap of some time after every call (this check is already implemented)
