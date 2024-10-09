@@ -272,7 +272,7 @@ The function `drainTreasury()` allows the contract owner to drain all ERC20 toke
 It is recommended to use Multi-Sig wallet
 
 #### Resolution:
-Accknowledged
+Acknowledged
 
 ### [M-02] Chainlink's `latestRoundData` might return stale or incorrect results
 
