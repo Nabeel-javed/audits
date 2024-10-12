@@ -115,3 +115,46 @@ It is recommended to use Multi-Sig wallet
 
 Users should be aware that the contract will be managed by an Externally Owned Account (EOA)
 
+
+## Informational
+
+### [I-01] safeApprove() is deprecated
+
+#### Summary
+According to Openzeppelin `safeApprove()` is [deprecated](https://github.com/OpenZeppelin/openzeppelin-contracts/blob/566a774222707e424896c0c390a84dc3c13bdcb2/contracts/token/ERC20/utils/SafeERC20.sol#L38)
+
+```solidity
+/**
+     * @dev Deprecated. This function has issues similar to the ones found in
+     * {IERC20-approve}, and its usage is discouraged.
+     *
+     * Whenever possible, use {safeIncreaseAllowance} and
+     * {safeDecreaseAllowance} instead.
+     */
+```
+
+### [I-02] Consider moving msg.sender checks to modifiers
+
+#### Summary
+ISome functions are only allowed to be called by some specific users (s_ownerAddress), consider using a modifier instead of checking with a require statement, especially if this check is done in multiple functions.  
+
+### [I-03] Use assembly to emit events
+
+### Summary
+Using the [scratch space](https://github.com/Vectorized/solady/blob/30558f5402f02351b96eeb6eaf32bcea29773841/src/tokens/ERC1155.sol#L501-L504) for event arguments (two words or fewer) will save gas over needing Soliditys full abi memory expansion used for emitting normally.
+
+### [I-04] Consider implementing two-step procedure for updation
+
+### Summary 
+A typo error or a copy-paste error can end up bricking the whole protocol. So consider using 2 step procedure for it
+
+### [I-05] Use the latest solidity version for deployment
+
+### Summary 
+Upgrading to a newer Solidity release can optimize gas usage, take advantage of new features and improve overall contract efficiency. Where possible, based on compatibility requirements, it is recommended to use newer/latest solidity version to take advantage of the latest optimizations and features. You can see the latest version [here](https://soliditylang.org/blog/category/releases/)
+
+### [I-06] Non-external/public variable names should begin with an underscore
+
+### Summary 
+Using an underscore at the beginning of non-external/public variable names can improve code clarity and maintainability. According to the Solidity Style Guide, non-external/public variable names should begin with an [underscore](https://docs.soliditylang.org/en/latest/style-guide.html#underscore-prefix-for-non-external-functions-and-variables)
+
