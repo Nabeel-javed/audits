@@ -112,7 +112,7 @@ According to Openzeppelin `safeApprove()` is [deprecated](https://github.com/Ope
 ### [I-02] Consider moving msg.sender checks to modifiers
 
 #### Summary
-ISome functions are only allowed to be called by some specific users (s_ownerAddress), consider using a modifier instead of checking with a require statement, especially if this check is done in multiple functions.  
+Some functions are only allowed to be called by some specific users (s_ownerAddress), consider using a modifier instead of checking with a require statement, especially if this check is done in multiple functions.  
 
 ### [I-03] Use assembly to emit events
 
@@ -127,7 +127,7 @@ A typo error or a copy-paste error can end up bricking the whole protocol. So co
 ### [I-05] Use the latest solidity version for deployment
 
 ### Summary 
-Upgrading to a newer Solidity release can optimize gas usage, take advantage of new features and improve overall contract efficiency. Where possible, based on compatibility requirements, it is recommended to use newer/latest solidity version to take advantage of the latest optimizations and features. You can see the latest version [here](https://soliditylang.org/blog/category/releases/)
+Upgrading to a newer Solidity release can optimize gas usage and solve bugs that previous version can have take advantage of new features and improve overall contract efficiency. Where possible, based on compatibility requirements, it is recommended to use newer/latest solidity version to take advantage of the latest optimizations and features. You can see the latest version [here](https://soliditylang.org/blog/category/releases/)
 
 ### [I-06] Non-external/public variable names should begin with an underscore
 
