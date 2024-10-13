@@ -60,7 +60,7 @@ as possible. Audits can show the presence of vulnerabilities **but not their abs
 | High risk     |       0 |
 | Medium risk   |     1 |
 | Low risk      |       0 |
-| Informational      |       4 |
+| Informational      |       3 |
 
 
 
@@ -91,6 +91,7 @@ You can use `isContract()` modifier by openzeppelin but there is also a catch wi
 Moreover If you want to restrict a Bot calling this fuction multiple time we can place a `require` condition that can make sure there is a gap of some time after every call (this check is already implemented)
 
 **Resolution**
+
 Acknowledged. Buy&Burn contract implements interval which should prevent the function from being abused. However, it is not future-proof solution for bot prevention. Users should be aware of this topic.
 
 ## Informational
@@ -110,6 +111,7 @@ According to Openzeppelin `safeApprove()` is [deprecated](https://github.com/Ope
      */
 ```
 **Resolution**
+
 Acknowledged. The safeApprove is used once in the function createInitialLiquidity and in this case does not pose a race condition threat.
 
 ### [I-02] Consider moving msg.sender checks to modifiers
@@ -118,20 +120,16 @@ Acknowledged. The safeApprove is used once in the function createInitialLiquidit
 Some functions are only allowed to be called by some specific users (s_ownerAddress), consider using a modifier instead of checking with a require statement, especially if this check is done in multiple functions.  
 
 **Resolution**
+
 Acknowledged. No further action will be taken for this contract
 
 
-### [I-03] Use assembly to emit events
 
-### Summary
-Using the [scratch space](https://github.com/Vectorized/solady/blob/30558f5402f02351b96eeb6eaf32bcea29773841/src/tokens/ERC1155.sol#L501-L504) for event arguments (two words or fewer) will save gas over needing Soliditys full abi memory expansion used for emitting normally.
-
-**Resolution**
-Acknowledge
-
-### [I-04] Use the latest solidity version for deployment
+### [I-03] Use the latest solidity version for deployment
 
 ### Summary 
 Upgrading to a newer Solidity release can optimize gas usage and solve bugs that previous version can have take advantage of new features and improve overall contract efficiency. Where possible, based on compatibility requirements, it is recommended to use newer/latest solidity version to take advantage of the latest optimizations and features. You can see the latest version [here](https://soliditylang.org/blog/category/releases/)
 
+**Resolution**
 
+Acknowledge
