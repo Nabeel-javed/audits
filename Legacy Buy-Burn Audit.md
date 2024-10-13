@@ -60,7 +60,7 @@ as possible. Audits can show the presence of vulnerabilities **but not their abs
 | High risk     |       0 |
 | Medium risk   |     1 |
 | Low risk      |       0 |
-| Informational      |       6 |
+| Informational      |       4 |
 
 
 
@@ -129,7 +129,7 @@ Using the [scratch space](https://github.com/Vectorized/solady/blob/30558f5402f0
 **Resolution**
 Acknowledge
 
-### [I-05] Use the latest solidity version for deployment
+### [I-04] Use the latest solidity version for deployment
 
 ### Summary 
 Upgrading to a newer Solidity release can optimize gas usage and solve bugs that previous version can have take advantage of new features and improve overall contract efficiency. Where possible, based on compatibility requirements, it is recommended to use newer/latest solidity version to take advantage of the latest optimizations and features. You can see the latest version [here](https://soliditylang.org/blog/category/releases/)
