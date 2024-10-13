@@ -68,9 +68,8 @@ as possible. Audits can show the presence of vulnerabilities **but not their abs
 
 | File                                                                                                    | 
 | :------------------------------------------------------------------------------------------------------ | 
-| _Contracts (2)_                                                  |
+| _Contracts (1)_                                                  |
 | /BuyAndBurn.sol |
-| /MockBuyAndBurn.sol |
 
 # Findings
 
