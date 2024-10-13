@@ -132,4 +132,4 @@ Upgrading to a newer Solidity release can optimize gas usage and solve bugs that
 
 **Resolution**
 
-Acknowledge
+Acknowledged. No further action will be taken
