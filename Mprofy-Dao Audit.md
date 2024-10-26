@@ -503,3 +503,15 @@ There are total 10 instances of this issue
 #### Resolution:
 Acknowledge
 
+
+## Changes
+
+In [02741fadc43e47b47d3d6e6569422d92d4e5e258](02741fadc43e47b47d3d6e6569422d92d4e5e258) commit a few changes were made in the code which includes 
+
+Removing `updateTopTreasury` for each for loop item in `deposit_admin` [function](https://github.com/DhruvGodambe/mprofy-dao-web3/blob/dev/contracts/treasury/Treasury.sol#L452)
+Removing extra function for DAI allocation ratio for [swapping](https://github.com/DhruvGodambe/mprofy-dao-web3/blob/dev/contracts/treasury/Treasury.sol#L433)
+Removing `updateTopTreasury` for each for loop item in withdraw
+
+upon furthur review these changes looks fine and no bug was identified
+
+
