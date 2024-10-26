@@ -517,3 +517,4 @@ In [02741fadc43e47b47d3d6e6569422d92d4e5e258](02741fadc43e47b47d3d6e6569422d92d4
 upon furthur review these changes looks fine and no bug was identified
 
 
+**Since this update involves removing of  `updateTopTreasury` function (which was gas inefficient), now the contract is more gas efficient as compare to previous state.**
