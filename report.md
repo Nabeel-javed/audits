@@ -88,7 +88,7 @@ as possible. Audits can show the presence of vulnerabilities **but not their abs
 
 ### Issue: Oracle data feed can be outdated yet used anyways
 
-### Description
+#### Description
 Chainlink classifies their data feeds into four different groups regarding how reliable is each source thus, how risky they are. The groups are *Verified Feeds, Monitored Feeds, Custom Feeds and Specialized Feeds* (they can be seen [here](https://docs.chain.link/docs/selecting-data-feeds/#data-feed-categories)). The risk is the lowest on the first one and highest on the last one.
 
 A strong reliance on the price feeds has to be also monitored as recommended on the [Risk Mitigation section](https://docs.chain.link/docs/selecting-data-feeds/#risk-mitigation). There are several reasons why a data feed may fail such as unforeseen market events, volatile market conditions, degraded performance of infrastructure, chains, or networks, upstream data providers outage, malicious activities from third parties among others.
@@ -116,7 +116,7 @@ function convertEthToUsd() public view returns (uint256) {
 Regarding Empower Token itself, only the `answer` is used. The retrieved price of the `priceFeed` can be outdated and used anyways as a valid data because no timestamp tolerance of the update source time is checked while storing the return parameters of `feed.latestRoundData()` as recommended by Chainlink. The usage of outdated data can impact on how the Payment terminals work regarding pricing calculation and value measurement.
 
 
-### **Recommendation**
+#### **Recommendation**
 It is recommended to add a tolerance that compares the `updatedAt` return timestamp from `latestRoundData()` with the current block timestamp and ensure that the `priceFeed` is being updated with the required frequency.
 
  `ETH/USD` is the only one that is needed to retrieve, because it is the most popular and available pair. It can also be useful to add other oracle to get the price feed (such as Uniswap's). This can be used as a redundancy in the case of having one oracle that returns outdated values (what is outdated and what is up to date can be determined by a tolerance as mentioned).
@@ -146,10 +146,10 @@ It is recommended to implement a **withdraw function** that allows the contract 
 
 ### Issue: ETH transfer uses deprecated `.transfer()` instead of `.call()`
 
-### Description
+#### Description
 The contract uses `.transfer()` to send ETH. This method is deprecated and has a hard-coded gas limit of 2300 gas units, which could potentially cause transactions to fail if the receiving address is a contract with a more complex receive function.
 
-### Proof of Concept (PoC)
+#### Proof of Concept (PoC)
 ```solidity
 // Current implementation
 function retrieve() public onlyOwner {
@@ -159,13 +159,13 @@ function retrieve() public onlyOwner {
 }
 ```
 
-### Technical Details
+#### Technical Details
 1. `.transfer()` forwards exactly 2300 gas
 2. `.call()` forwards all available gas by default
 3. `.call()` returns a boolean indicating success/failure
 4. Important to check the return value of `.call()`
 
-### Recommended Mitigation
+#### Recommended Mitigation
 Use `.call()` with value instead of `.transfer()` and implement checks-effects-interactions pattern:
 
 ```solidity
@@ -179,22 +179,73 @@ function retrieve() public onlyOwner {
 }
 ```
 
-### **Resolution**
+#### **Resolution**
+
+
+
+
+
+
+
+
+
+
+
+
+### Issue: Lack of Approval Check before `transferFrom` Call
+
+#### Description
+In the current code (alot of places), the `transferFrom` function is called without first verifying that the calling contract has been approved to spend the specified amount (`collateralAmount`) by the sender (`msg.sender`). This can lead to a failure if the required approval is not in place, which could halt the execution of the function and revert the transaction.
+
+
+ The code snippet calls `transferFrom` using:
+ 
+  ```solidity
+  (success, data) = (i_empowerToken).call(
+      abi.encodeWithSignature(
+          "transferFrom(address,address,uint256)", msg.sender, address(this), collateralAmount
+      )
+  );
+  ```
+  This initiates a transfer of `collateralAmount` tokens from the sender (`msg.sender`) to the contract (`address(this)`). However, there is no check to ensure that `msg.sender` has approved this contract to spend the specified amount.
+
+- **Potential Issue**: Without confirming the allowance, the transfer may fail if the sender has not previously granted sufficient allowance to the contract. This lack of allowance verification could lead to failed transactions
+
+
+#### **Recommendations**
+
+Retrieve the current allowance using the `allowance` function and ensure it meets or exceeds `collateralAmount`.
+
+If allowance is insufficient, prompt users to call the `approve` function to set an adequate allowance for the contract.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 ## Issue: Missing sender tracking in ETH deposits breaks protocol functionality
 
-### Description
+#### Description
 The `receive()` function accumulates ETH rewards without tracking the sender's address. This is a critical issue as the protocol lacks a mechanism to identify who contributed what amount of ETH, which could break core protocol functionality like reward distribution or withdrawal mechanisms.
 
-### Impact
+#### Impact
 - Protocol cannot track individual user contributions
 - Unable to attribute rewards to specific users
 - No way to implement user-specific withdrawals
 - Could lead to loss of user funds or unfair reward distribution
 - Core protocol functionality may be compromised
 
-### Proof of Concept (PoC)
+#### Proof of Concept (PoC)
 ```solidity
 receive() external payable {
     if (msg.value == 0) {
@@ -214,7 +265,7 @@ If multiple users send ETH:
    - How to distribute rewards fairly
    - How to handle user-specific withdrawals
 
-### Recommended Mitigation
+#### Recommended Mitigation
 Implement a mapping to track user deposits:
 
 ```solidity
@@ -239,16 +290,7 @@ receive() external payable {
 }
 
 ```
-
-### Recommendation
-
-1. Add a mapping to track each user's ETH contributions
-2. Update the mapping whenever ETH is received
-3. Add getters to allow querying of user contributions
-4. Emit events for off-chain tracking
-5. Ensure this tracking integrates with the protocol's reward distribution system
-
-### **Resolution**
+#### **Resolution**
 
 
 ### Issue: Missing Return Check on `staticcall` in `getBorrowAmountInUSDC`
@@ -262,7 +304,7 @@ The `staticcall` function returns two values:
 
 The code is using `staticcall` to retrieve values such as the token’s decimals and the Ethereum equivalent of the borrowed amount. However, if either of these `staticcall` operations fails, the contract will continue execution without any explicit check, potentially leading to incorrect results or even state corruption.
 
-### Recommendation
+#### Recommendation
 
 ```solidity
     (bool success, bytes memory data) = (i_empowerToken).staticcall(abi.encodeWithSignature("decimals()"));
@@ -286,23 +328,13 @@ If there are no plans to use this function in future logic, remove it to optimiz
 
 ## Informational
 
-### [I-01] safeApprove() is deprecated
+### [I-01] Emit event at the end of function
 
 #### Summary
-According to Openzeppelin `safeApprove()` is [deprecated](https://github.com/OpenZeppelin/openzeppelin-contracts/blob/566a774222707e424896c0c390a84dc3c13bdcb2/contracts/token/ERC20/utils/SafeERC20.sol#L38)
+It is always recommended to emit the event at the end of function to ensure that the whole function completes before emitting the event. If that's not the case then th event can be emitted first and if there is any offChain system that is looking for the event emission may interpret it wrongly
 
-```solidity
-/**
-     * @dev Deprecated. This function has issues similar to the ones found in
-     * {IERC20-approve}, and its usage is discouraged.
-     *
-     * Whenever possible, use {safeIncreaseAllowance} and
-     * {safeDecreaseAllowance} instead.
-     */
-```
 **Resolution**
 
-Acknowledged. The safeApprove is used once in the function createInitialLiquidity and in this case does not pose a race condition threat.
 
 ### [I-02] Consider moving msg.sender checks to modifiers
 
