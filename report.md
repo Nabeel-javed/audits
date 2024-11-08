@@ -1,11 +1,11 @@
-# Legacy Buy-Burn Security Review
+# EMPOWER TOKEN Security Review
 
-A security review of the Legacy Buy-Burn smart contract protocol was done by [0xepley](https://twitter.com/0xepley). \
+A security review of the Empower Token smart contract protocol was done by [0xepley](https://twitter.com/0xepley). \
 This audit report includes all the vulnerabilities, issues and code improvements found during the security review.
 
 ## About Legacy
 
-Legacy is a decentralized smart contract protocol on Ethereum designed to be a digital store of value with Bitcoin-like tokenomics, offering a finite supply, self-minting rewards mechanism, and the potential to outperform Bitcoin, all while providing an inflation-resistant asset that empowers users to preserve and grow their wealth in a secure, decentralized, and energy-efficient manner.
+EmpowerCoin’s unique model redistributes a portion of transaction fees to EMPC token holders, creating a steady stream of passive income. This means users earn rewards simply by holding EMPC tokens, making it an attractive investment that continuously generates returns.
 
 ## Disclaimer
 
@@ -47,8 +47,8 @@ as possible. Audits can show the presence of vulnerabilities **but not their abs
 
 |               |                                                                                              |
 | :------------ | :------------------------------------------------------------------------------------------- |
-| Project Name  | Legacy Buy-Burn                                                                                     |
-| Repository    | https://github.com/devdomsos/legacy-smart-contracts-audit/  
+| Project Name  | Empower Token                                                                                   |
+| Website    | https://empowercoin.finance/  
 | Methods       | Static + Manual review                                                                                |
 |               |
 
@@ -66,10 +66,21 @@ as possible. Audits can show the presence of vulnerabilities **but not their abs
 
 ### Scope
 
-| File                                                                                                    | 
+| File | 
 | :------------------------------------------------------------------------------------------------------ | 
-| _Contracts (1)_                                                  |
-| /BuyAndBurn.sol |
+| *Contracts (12)*                                                  |
+| /UpgradeableProxies/BorrowLendProxy.sol |
+| /UpgradeableProxies/DonationProxy.sol |
+| /UpgradeableProxies/EmpowerTokenProxy.sol |
+| /UpgradeableProxies/EscrowProxy.sol |
+| /UpgradeableProxies/LoanPaymentProxy.sol |
+| /UpgradeableProxies/TreasuryProxy.sol |
+| /BorrowLendUpgradeable.sol |
+| /DonationUpgradable.sol |
+| /EmpowerTokenUpgradeable.sol |
+| /EscrowUpgradeable.sol |
+| /LoanPaymentUpgradeable.sol |
+| /TreasuryUpgradeable.sol |
 
 # Findings
 
