@@ -84,26 +84,99 @@ as possible. Audits can show the presence of vulnerabilities **but not their abs
 
 # Findings
 
+## High Severity
+
+### Issue: Oracle data feed can be outdated yet used anyways
+
+### Description
+Chainlink classifies their data feeds into four different groups regarding how reliable is each source thus, how risky they are. The groups are *Verified Feeds, Monitored Feeds, Custom Feeds and Specialized Feeds* (they can be seen [here](https://docs.chain.link/docs/selecting-data-feeds/#data-feed-categories)). The risk is the lowest on the first one and highest on the last one.
+
+A strong reliance on the price feeds has to be also monitored as recommended on the [Risk Mitigation section](https://docs.chain.link/docs/selecting-data-feeds/#risk-mitigation). There are several reasons why a data feed may fail such as unforeseen market events, volatile market conditions, degraded performance of infrastructure, chains, or networks, upstream data providers outage, malicious activities from third parties among others.
+
+Chainlink recommends using their data feeds along with some controls to prevent mismatches with the retrieved data. Along some recommendations, the feed can include circuit breakers (for extreme price events), contract update delays (to ensure that the injected data into the protocol is fresh enough), manual kill-switches (to cease connection in case of found bug or vulnerability in an upstream contract), monitoring (control the deviation of the data) and soak testing (of the price feeds).
+
+```solidity
+function convertEthToUsd() public view returns (uint256) {
+        (
+            ,
+            /* uint80 roundID */
+            int256 answer,
+            ,
+            ,
+        ) = /*uint startedAt*/
+        /*uint timeStamp*/
+        /*uint80 answeredInRound*/
+         s_ethUsdPriceFeed.latestRoundData(); //@audit
+
+        uint256 additionalPrecision = s_ethUsdPriceFeed.decimals() - ERC20Upgradeable(i_usdcToken).decimals();
+        return uint256(answer) / (10 ** additionalPrecision);
+    }
+```
+
+Regarding Empower Token itself, only the `answer` is used. The retrieved price of the `priceFeed` can be outdated and used anyways as a valid data because no timestamp tolerance of the update source time is checked while storing the return parameters of `feed.latestRoundData()` as recommended by Chainlink. The usage of outdated data can impact on how the Payment terminals work regarding pricing calculation and value measurement.
+
+
+### **Recommendation**
+It is recommended to add a tolerance that compares the `updatedAt` return timestamp from `latestRoundData()` with the current block timestamp and ensure that the `priceFeed` is being updated with the required frequency.
+
+ `ETH/USD` is the only one that is needed to retrieve, because it is the most popular and available pair. It can also be useful to add other oracle to get the price feed (such as Uniswap's). This can be used as a redundancy in the case of having one oracle that returns outdated values (what is outdated and what is up to date can be determined by a tolerance as mentioned).
+
+
 
 ## Medium severity
 
-### [M-01] `Require` condition that ensures call is from EOA might not hold true in the future
+### Issue: No Withdraw Function for Ether in the Contract
 
-**Description**:  
+#### **Summary**
+The contract `Rounter.sol` includes a `receive()` function to accept Ether (ETH) transfers, but it does not have a corresponding withdraw function to allow users to retrieve or withdraw their funds. 
 
-In the `buynBurn` function the code is using the check `require(msg.sender == tx.origin)` to prevent contract accounts from calling the function. While this approach ensures that only Externally Owned Accounts (EOAs) can call the function, this check is not future-proof due to **EIP-3074** (a proposed Ethereum Improvement Proposal).
+#### **Issue Description**
+In Solidity, a `receive()` function allows a contract to accept Ether payments. The function is automatically triggered when Ether is sent to the contract. However, in this contract, there is no mechanism to allow users to withdraw their funds after sending them.
 
-This [EIP](https://eips.ethereum.org/EIPS/eip-3074#abstract) introduces two EVM instructions **AUTH** and **AUTHCALL**. The first sets a context variable authorized based on an ECDSA signature. The second sends a call as the authorized account. **This essentially delegates control of the externally owned account (EOA) to a smart contract.**
+The absence of a withdraw function can be problematic in the following ways:
+1. **Accidental ETH Transfers**: If a user mistakenly sends ETH to the contract, they will not be able to recover it because there is no withdraw function implemented.
+2. **No Recovery Mechanism**: Without a dedicated function to withdraw Ether, the contract cannot offer a safe way to reverse transactions in case of mistakes or unintended transfers.
 
-**Recommendation**:
+#### **Recommendation**
+It is recommended to implement a **withdraw function** that allows the contract owner or users to withdraw Ether from the contract. 
 
-You can use `isContract()` modifier by openzeppelin but there is also a catch with that: If the function is called in the constructor. `isContract()` checks for the code length, but during construction code length is 0. So this check can be bypassed.
+#### **Resolution:**
 
-Moreover If you want to restrict a Bot calling this fuction multiple time we can place a `require` condition that can make sure there is a gap of some time after every call (this check is already implemented)
+### Issue: ETH transfer uses deprecated `.transfer()` instead of `.call()`
 
-**Resolution**
+### Description
+The contract uses `.transfer()` to send ETH. This method is deprecated and has a hard-coded gas limit of 2300 gas units, which could potentially cause transactions to fail if the receiving address is a contract with a more complex receive function.
 
-Acknowledged. Buy&Burn contract implements interval which should prevent the function from being abused. However, it is not future-proof solution for bot prevention. Users should be aware of this topic.
+### Proof of Concept (PoC)
+```solidity
+// Current implementation
+function retrieve() public onlyOwner {
+    if (ethBal > 0) {
+        payable(msg.sender).transfer(ethBal); //@audit - using deprecated transfer
+    }
+}
+```
+
+### Technical Details
+1. `.transfer()` forwards exactly 2300 gas
+2. `.call()` forwards all available gas by default
+3. `.call()` returns a boolean indicating success/failure
+4. Important to check the return value of `.call()`
+
+### Recommended Mitigation
+Use `.call()` with value instead of `.transfer()` and implement checks-effects-interactions pattern:
+
+```solidity
+function retrieve() public onlyOwner {
+
+    if (ethBal > 0) {
+        // Using call instead of transfer
+        (bool success, ) = payable(msg.sender).call{value: ethBal}("");
+        require(success, "ETH transfer failed");
+    }
+}
+```
+
 
 ## Informational
 
