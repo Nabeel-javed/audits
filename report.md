@@ -142,6 +142,8 @@ It is recommended to implement a **withdraw function** that allows the contract 
 
 #### **Resolution:**
 
+
+
 ### Issue: ETH transfer uses deprecated `.transfer()` instead of `.call()`
 
 ### Description
@@ -177,6 +179,110 @@ function retrieve() public onlyOwner {
 }
 ```
 
+### **Resolution**
+
+
+## Issue: Missing sender tracking in ETH deposits breaks protocol functionality
+
+### Description
+The `receive()` function accumulates ETH rewards without tracking the sender's address. This is a critical issue as the protocol lacks a mechanism to identify who contributed what amount of ETH, which could break core protocol functionality like reward distribution or withdrawal mechanisms.
+
+### Impact
+- Protocol cannot track individual user contributions
+- Unable to attribute rewards to specific users
+- No way to implement user-specific withdrawals
+- Could lead to loss of user funds or unfair reward distribution
+- Core protocol functionality may be compromised
+
+### Proof of Concept (PoC)
+```solidity
+receive() external payable {
+    if (msg.value == 0) {
+        revert();
+    }
+    // @audit Critical: No tracking of sender address
+    ethReward.lastTimeRewardGotInTime = block.timestamp;
+    ethReward.totalRewardsAccumulatedTillTime += msg.value;
+}
+```
+
+If multiple users send ETH:
+1. User A sends 1 ETH
+2. User B sends 2 ETH
+3. Total is tracked (3 ETH) but protocol has no way to know:
+   - Who sent what amount
+   - How to distribute rewards fairly
+   - How to handle user-specific withdrawals
+
+### Recommended Mitigation
+Implement a mapping to track user deposits:
+
+```solidity
+// Add state variable
+mapping(address => uint256) public userEthContributions;
+
+// Add event
+event EthReceived(address indexed sender, uint256 amount, uint256 timestamp);
+
+receive() external payable {
+    if (msg.value == 0) {
+        revert();
+    }
+    
+    // Track individual contributions
+    userEthContributions[msg.sender] += msg.value;
+    
+    ethReward.lastTimeRewardGotInTime = block.timestamp;
+    ethReward.totalRewardsAccumulatedTillTime += msg.value;
+    
+    emit EthReceived(msg.sender, msg.value, block.timestamp);
+}
+
+```
+
+### Recommendation
+
+1. Add a mapping to track each user's ETH contributions
+2. Update the mapping whenever ETH is received
+3. Add getters to allow querying of user contributions
+4. Emit events for off-chain tracking
+5. Ensure this tracking integrates with the protocol's reward distribution system
+
+### **Resolution**
+
+
+### Issue: Missing Return Check on `staticcall` in `getBorrowAmountInUSDC`
+
+In the function `getBorrowAmountInUSDC`, the code is using the `staticcall` function to interact with other contracts, but there is no check on the return value of the `staticcall`. The `staticcall` is a low-level function that executes a function in another contract, and its result could potentially fail or return invalid data. It’s important to verify both the success of the call and the validity of the returned data to ensure your contract behaves as expected.
+
+#### **Description**
+The `staticcall` function returns two values:
+1. `success`: A boolean indicating whether the call succeeded (i.e., whether it did not revert).
+2. `data`: The data returned by the call, which could represent any type of result depending on the function being called.
+
+The code is using `staticcall` to retrieve values such as the token’s decimals and the Ethereum equivalent of the borrowed amount. However, if either of these `staticcall` operations fails, the contract will continue execution without any explicit check, potentially leading to incorrect results or even state corruption.
+
+### Recommendation
+
+```solidity
+    (bool success, bytes memory data) = (i_empowerToken).staticcall(abi.encodeWithSignature("decimals()"));
+    if (!success || data.length == 0) {
+        revert("Failed to get decimals");
+    }
+}
+```
+
+## Low
+
+### [L-01] Unused Function `transferFunds`
+
+#### Summary
+The function `transferFunds` in `BorrowLend.sol` is defined in the contract but is not used anywhere in the codebase. This is a low-severity issue, as the presence of an unused function does not introduce security vulnerabilities directly. However, it can lead to unnecessary increases in the bytecode size, making the contract slightly more costly to deploy and possibly more challenging to understand for future maintainers.
+
+#### **Recommendations**
+If there are no plans to use this function in future logic, remove it to optimize contract size and clarity.
+
+#### **Resolution**
 
 ## Informational
 
