@@ -1,4 +1,4 @@
-# EMPOWER TOKEN Security Review
+# EmPower Token Security Review
 
 A security review of the Empower Token smart contract protocol was done by [0xepley](https://twitter.com/0xepley). \
 This audit report includes all the vulnerabilities, issues and code improvements found during the security review.
@@ -326,6 +326,35 @@ If there are no plans to use this function in future logic, remove it to optimiz
 
 #### **Resolution**
 
+
+## Gas Severity
+
+### [G-01] Nesting if-statements is cheaper than using &&
+
+#### Details
+Nesting if-statements avoids the stack operations of setting up and using an extra jumpdest, and saves 6 [gas](https://gist.github.com/IllIllI000/7f3b818abecfadbef93b894481ae7d19)
+
+#### **Resolution**
+
+### [G-02] Cache array length outside of loop
+
+#### Details
+If not cached, the solidity compiler will always read the length of the array during each iteration. That is, if it is a storage array, this is an extra sload operation (100 additional extra gas for each iteration except for the first) and if it is a memory array, this is an extra mload operation (3 additional gas for each iteration except for the first).
+
+There are two instances of this issue in `BorrowLendUpgradeable.sol`
+
+#### **Resolution**
+
+
+### [G-03] Nesting if-statements is cheaper than using &&
+
+#### Details
+Nesting if-statements avoids the stack operations of setting up and using an extra jumpdest, and saves 6 [gas](https://gist.github.com/IllIllI000/7f3b818abecfadbef93b894481ae7d19)
+
+#### **Resolution**
+
+
+
 ## Informational
 
 ### [I-01] Emit event at the end of function
@@ -336,22 +365,10 @@ It is always recommended to emit the event at the end of function to ensure that
 **Resolution**
 
 
-### [I-02] Consider moving msg.sender checks to modifiers
-
-#### Summary
-Some functions are only allowed to be called by some specific users (s_ownerAddress), consider using a modifier instead of checking with a require statement, especially if this check is done in multiple functions.  
-
-**Resolution**
-
-Acknowledged. No further action will be taken for this contract
-
-
-
-### [I-03] Use the latest solidity version for deployment
+### [I-02] Use the latest solidity version for deployment
 
 ### Summary 
 Upgrading to a newer Solidity release can optimize gas usage and solve bugs that previous version can have take advantage of new features and improve overall contract efficiency. Where possible, based on compatibility requirements, it is recommended to use newer/latest solidity version to take advantage of the latest optimizations and features. You can see the latest version [here](https://soliditylang.org/blog/category/releases/)
 
 **Resolution**
 
-Acknowledged. No further action will be taken
