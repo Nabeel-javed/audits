@@ -3,7 +3,7 @@
 A security review of the Empower Token smart contract protocol was done by [0xepley](https://twitter.com/0xepley). \
 This audit report includes all the vulnerabilities, issues and code improvements found during the security review.
 
-## About Legacy
+## About Empower Token
 
 EmpowerCoin’s unique model redistributes a portion of transaction fees to EMPC token holders, creating a steady stream of passive income. This means users earn rewards simply by holding EMPC tokens, making it an attractive investment that continuously generates returns.
 
