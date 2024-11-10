@@ -86,7 +86,7 @@ as possible. Audits can show the presence of vulnerabilities **but not their abs
 
 ## High Severity
 
-### Issue: Oracle data feed can be outdated yet used anyways
+### Issue[01]: Oracle data feed can be outdated yet used anyways
 
 #### Description
 Chainlink classifies their data feeds into four different groups regarding how reliable is each source thus, how risky they are. The groups are *Verified Feeds, Monitored Feeds, Custom Feeds and Specialized Feeds* (they can be seen [here](https://docs.chain.link/docs/selecting-data-feeds/#data-feed-categories)). The risk is the lowest on the first one and highest on the last one.
@@ -125,7 +125,7 @@ It is recommended to add a tolerance that compares the `updatedAt` return timest
 
 ## Medium severity
 
-### Issue: No Withdraw Function for Ether in the Contract
+### Issue[01]: No Withdraw Function for Ether in the Contract
 
 #### **Summary**
 The contract `Rounter.sol` includes a `receive()` function to accept Ether (ETH) transfers, but it does not have a corresponding withdraw function to allow users to retrieve or withdraw their funds. 
@@ -144,7 +144,7 @@ It is recommended to implement a **withdraw function** that allows the contract 
 
 
 
-### Issue: ETH transfer uses deprecated `.transfer()` instead of `.call()`
+### Issue[02]: ETH transfer uses deprecated `.transfer()` instead of `.call()`
 
 #### Description
 The contract uses `.transfer()` to send ETH. This method is deprecated and has a hard-coded gas limit of 2300 gas units, which could potentially cause transactions to fail if the receiving address is a contract with a more complex receive function.
@@ -192,7 +192,7 @@ function retrieve() public onlyOwner {
 
 
 
-### Issue: Lack of Approval Check before `transferFrom` Call
+### Issue[03]: Lack of Approval Check before `transferFrom` Call
 
 #### Description
 In the current code (alot of places), the `transferFrom` function is called without first verifying that the calling contract has been approved to spend the specified amount (`collateralAmount`) by the sender (`msg.sender`). This can lead to a failure if the required approval is not in place, which could halt the execution of the function and revert the transaction.
@@ -233,7 +233,7 @@ If allowance is insufficient, prompt users to call the `approve` function to set
 
 
 
-## Issue: Missing sender tracking in ETH deposits breaks protocol functionality
+## Issue[04]: Missing sender tracking in ETH deposits breaks protocol functionality
 
 #### Description
 The `receive()` function accumulates ETH rewards without tracking the sender's address. This is a critical issue as the protocol lacks a mechanism to identify who contributed what amount of ETH, which could break core protocol functionality like reward distribution or withdrawal mechanisms.
@@ -293,7 +293,7 @@ receive() external payable {
 #### **Resolution**
 
 
-### Issue: Missing Return Check on `staticcall` in `getBorrowAmountInUSDC`
+### Issue[05]: Missing Return Check on `staticcall` in `getBorrowAmountInUSDC`
 
 In the function `getBorrowAmountInUSDC`, the code is using the `staticcall` function to interact with other contracts, but there is no check on the return value of the `staticcall`. The `staticcall` is a low-level function that executes a function in another contract, and its result could potentially fail or return invalid data. It’s important to verify both the success of the call and the validity of the returned data to ensure your contract behaves as expected.
 
