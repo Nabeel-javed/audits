@@ -347,13 +347,6 @@ There are two instances of this issue in `BorrowLendUpgradeable.sol`
 #### **Resolution**
 
 
-### [G-03] Nesting if-statements is cheaper than using &&
-
-#### Details
-Nesting if-statements avoids the stack operations of setting up and using an extra jumpdest, and saves 6 [gas](https://gist.github.com/IllIllI000/7f3b818abecfadbef93b894481ae7d19)
-
-#### **Resolution**
-
 
 
 ## Informational
