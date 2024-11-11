@@ -148,7 +148,7 @@ It is recommended to implement a **withdraw function** that allows the contract 
 ### Issue[02]: ETH transfer uses deprecated `.transfer()` instead of `.call()`
 
 #### Description
-The contract uses `.transfer()` to send ETH. This method is deprecated and has a hard-coded gas limit of 2300 gas units, which could potentially cause transactions to fail if the receiving address is a contract with a more complex receive function.
+The contract `Donation.sol` in the function `transferETH` uses `.transfer()` to send ETH. This method is deprecated and has a hard-coded gas limit of 2300 gas units, which could potentially cause transactions to fail if the receiving address is a contract with a more complex receive function.
 
 #### Proof of Concept (PoC)
 ```solidity
@@ -292,7 +292,7 @@ receive() external payable {
 
 ```
 #### **Resolution**
-
+This is by deisng, user should be aware of this.
 
 ### Issue[05]: Missing Return Check on `staticcall` in `getBorrowAmountInUSDC`
 
