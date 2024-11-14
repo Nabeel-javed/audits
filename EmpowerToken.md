@@ -142,6 +142,7 @@ The absence of a withdraw function can be problematic in the following ways:
 It is recommended to implement a **withdraw function** that allows the contract owner or users to withdraw Ether from the contract. 
 
 #### **Resolution:**
+Solved
 
 
 
@@ -181,13 +182,7 @@ function retrieve() public onlyOwner {
 ```
 
 #### **Resolution**
-
-
-
-
-
-
-
+Solved
 
 
 
@@ -222,6 +217,7 @@ If allowance is insufficient, prompt users to call the `approve` function to set
 
 
 
+#### Resolution
 
 
 
@@ -315,6 +311,9 @@ The code is using `staticcall` to retrieve values such as the token’s decimals
 }
 ```
 
+#### Resolution
+No Solved
+
 ## Low
 
 ### [L-01] Unused Function `transferFunds`
@@ -326,6 +325,7 @@ The function `transferFunds` in `BorrowLend.sol` is defined in the contract but 
 If there are no plans to use this function in future logic, remove it to optimize contract size and clarity.
 
 #### **Resolution**
+Solved
 
 
 ## Gas Severity
@@ -336,6 +336,7 @@ If there are no plans to use this function in future logic, remove it to optimiz
 Nesting if-statements avoids the stack operations of setting up and using an extra jumpdest, and saves 6 [gas](https://gist.github.com/IllIllI000/7f3b818abecfadbef93b894481ae7d19)
 
 #### **Resolution**
+Solved
 
 ### [G-02] Cache array length outside of loop
 
@@ -345,8 +346,7 @@ If not cached, the solidity compiler will always read the length of the array du
 There are two instances of this issue in `BorrowLendUpgradeable.sol`
 
 #### **Resolution**
-
-
+Solved
 
 
 ## Informational
