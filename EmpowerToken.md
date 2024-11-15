@@ -60,7 +60,7 @@ as possible. Audits can show the presence of vulnerabilities **but not their abs
 | High risk     |       1 |
 | Medium risk   |     4 |
 | Low risk      |       1 |
-| Gas risk      |    3  |
+| Gas risk      |    2  |
 | Informational      |       2 |
 
 
@@ -328,5 +328,6 @@ Solved
 ### Summary 
 Upgrading to a newer Solidity release can optimize gas usage and solve bugs that previous version can have take advantage of new features and improve overall contract efficiency. Where possible, based on compatibility requirements, it is recommended to use newer/latest solidity version to take advantage of the latest optimizations and features. You can see the latest version [here](https://soliditylang.org/blog/category/releases/)
 
-**Resolution**
+**#### Resolution**
+
 Acknoledged
