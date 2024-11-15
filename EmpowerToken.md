@@ -58,7 +58,7 @@ as possible. Audits can show the presence of vulnerabilities **but not their abs
 | Severity      |                                                     Count |
 | :------------ | --------------------------------------------------------: |
 | High risk     |       1 |
-| Medium risk   |     5 |
+| Medium risk   |     4 |
 | Low risk      |       1 |
 | Gas risk      |    3  |
 | Informational      |       2 |
