@@ -122,6 +122,9 @@ It is recommended to add a tolerance that compares the `updatedAt` return timest
 
  `ETH/USD` is the only one that is needed to retrieve, because it is the most popular and available pair. It can also be useful to add other oracle to get the price feed (such as Uniswap's). This can be used as a redundancy in the case of having one oracle that returns outdated values (what is outdated and what is up to date can be determined by a tolerance as mentioned).
 
+#### **Resolution:**
+Solved
+
 
 
 ## Medium severity
@@ -188,49 +191,10 @@ Solved
 
 
 
-### Issue[03]: Lack of Approval Check before `transferFrom` Call
-
-#### Description
-In the current code (alot of places), the `transferFrom` function is called without first verifying that the calling contract has been approved to spend the specified amount (`collateralAmount`) by the sender (`msg.sender`). This can lead to a failure if the required approval is not in place, which could halt the execution of the function and revert the transaction.
-
-
- The code snippet calls `transferFrom` using:
- 
-  ```solidity
-  (success, data) = (i_empowerToken).call(
-      abi.encodeWithSignature(
-          "transferFrom(address,address,uint256)", msg.sender, address(this), collateralAmount
-      )
-  );
-  ```
-  This initiates a transfer of `collateralAmount` tokens from the sender (`msg.sender`) to the contract (`address(this)`). However, there is no check to ensure that `msg.sender` has approved this contract to spend the specified amount.
-
-- **Potential Issue**: Without confirming the allowance, the transfer may fail if the sender has not previously granted sufficient allowance to the contract. This lack of allowance verification could lead to failed transactions
-
-
-#### **Recommendations**
-
-Retrieve the current allowance using the `allowance` function and ensure it meets or exceeds `collateralAmount`.
-
-If allowance is insufficient, prompt users to call the `approve` function to set an adequate allowance for the contract.
 
 
 
-
-#### Resolution
-
-
-
-
-
-
-
-
-
-
-
-
-## Issue[04]: Missing sender tracking in ETH deposits breaks protocol functionality
+## Issue[03]: Missing sender tracking in ETH deposits breaks protocol functionality
 
 #### Description
 The `receive()` function accumulates ETH rewards without tracking the sender's address. This is a critical issue as the protocol lacks a mechanism to identify who contributed what amount of ETH, which could break core protocol functionality like reward distribution or withdrawal mechanisms.
@@ -290,7 +254,7 @@ receive() external payable {
 #### **Resolution**
 This is by deisng, user should be aware of this.
 
-### Issue[05]: Missing Return Check on `staticcall` in `getBorrowAmountInUSDC`
+### Issue[04]: Missing Return Check on `staticcall` in `getBorrowAmountInUSDC`
 
 In the function `getBorrowAmountInUSDC`, the code is using the `staticcall` function to interact with other contracts, but there is no check on the return value of the `staticcall`. The `staticcall` is a low-level function that executes a function in another contract, and its result could potentially fail or return invalid data. It’s important to verify both the success of the call and the validity of the returned data to ensure your contract behaves as expected.
 
@@ -312,7 +276,7 @@ The code is using `staticcall` to retrieve values such as the token’s decimals
 ```
 
 #### Resolution
-No Solved
+Solved
 
 ## Low
 
@@ -357,7 +321,7 @@ Solved
 It is always recommended to emit the event at the end of function to ensure that the whole function completes before emitting the event. If that's not the case then th event can be emitted first and if there is any offChain system that is looking for the event emission may interpret it wrongly
 
 **Resolution**
-
+Solved
 
 ### [I-02] Use the latest solidity version for deployment
 
@@ -365,4 +329,4 @@ It is always recommended to emit the event at the end of function to ensure that
 Upgrading to a newer Solidity release can optimize gas usage and solve bugs that previous version can have take advantage of new features and improve overall contract efficiency. Where possible, based on compatibility requirements, it is recommended to use newer/latest solidity version to take advantage of the latest optimizations and features. You can see the latest version [here](https://soliditylang.org/blog/category/releases/)
 
 **Resolution**
-
+Acknoledged
