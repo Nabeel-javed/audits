@@ -127,7 +127,7 @@ function burn(uint256 amount) external {
 }
 ```
 
----
+
 
 ###  Add `burnFrom()` for Approved Spenders
 ```solidity
