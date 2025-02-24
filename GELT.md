@@ -12,9 +12,8 @@ as possible. Audits can show the presence of vulnerabilities **but not their abs
 
 \- Secureum
 
-## About Mprofy
-Mprofy DAO is a decentralized platform designed to empower the existing Mprofy community, facilitating their transition from Web2 to Web3. The DAO enables users to actively participate in the governance of the platform by voting on and submitting proposals. If a proposal is approved, it can receive funding from the Mprofy treasury, which holds a variety of crypto assets such as USDT, DAI, WETH, WBTC, and more. These assets are commissions earned by Mprofy users and contributed to the treasury. Additionally, the treasury includes the Deed token, Mprofy's native platform token, further driving the ecosystem's growth and sustainability.
-
+## About GELT
+GELT is built on a decentralized blockchain infrastructure designed to ensure transparency, security, and immutability of transactions. By leveraging the power of blockchain, GELT aims to create an efficient financial ecosystem with:
 
 
 ## Risk classification
@@ -86,16 +85,7 @@ Mprofy DAO is a decentralized platform designed to empower the existing Mprofy c
 | Gas Saving    | [G-04] Using `private` rather than `public` for constants, saves gas                                                                   |
 
 
-### Scope
 
-| File                                                                                                    | 
-| :------------------------------------------------------------------------------------------------------ | 
-| _Contracts (5)_                                                  |
-| /Deed.sol |
-| /FounderNFT.sol |
-| /Governance.sol |
-| /PriceConvertor.sol |
-| /Treasury.sol |
 
 # Findings
 
