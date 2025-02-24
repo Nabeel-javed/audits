@@ -46,13 +46,10 @@ GELT is built on a decentralized blockchain infrastructure designed to ensure tr
 
 ### Overview
 
-|               |                                                                                              |
 | :------------ | :------------------------------------------------------------------------------------------- |
 | Project Name  | GELT                                                                                  |
 | Repository    | https://github.com/MDulquerS/TreasuryLari-StableCoin/blob/main/src/TreasuryLari.sol
 | Methods       | Static + Manual review                                                                                |
-|               |
-
 
 ### Issues found
 
@@ -126,7 +123,6 @@ function burnFrom(address account, uint256 amount) external {
 ## Medium severity
 
 ## Issue 2: Unsafe ERC20 Token Transfers Using `.call()`
-
 ### Overview
 In Solidity, using `.call()` to transfer ERC20 tokens is **not recommended** because it can fail for **non-standard ERC20 tokens** like USDT, BNB, and MKR. Some ERC20 tokens do not return a boolean (`true`) on `transfer()`, causing `.call()` to fail unexpectedly.  
 
