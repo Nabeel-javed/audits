@@ -65,24 +65,22 @@ GELT is built on a decentralized blockchain infrastructure designed to ensure tr
 
 ### Issues Summary
 
-| Severity      | Title                                                                                                                                   |
-| :------------ | :------------------------------------------------------------------------------------------------------------------------------------- |
-| High Risk     | [H-01] Excessive Proposal Fee sent by user is lost                                                                                   |
-| High Risk     | [H-02] Unrestricted Access to Change Swap Router Address                                                                              |
-| High Risk     | [H-03] Treasury can not received the Locked NFT                                                                                       |
-| High Risk     | [H-04] Incorrect Transfer of Non-DAI Assets                                                                                      |
-| Medium Risk   | [M-01] Excessive Centralization Risk by Owner                                                                                         |
-| Medium Risk   | [M-02] Chainlink's `latestRoundData` might return stale or incorrect results                                                          |
-| Medium Risk   | [M-03] Hardcoding slippage to `0` can cause loss of funds                                                                             |
-| Medium Risk   | [M-04] Incorrect Placement of Total Deed Tokens Calculation for Each User                                                              |
-| Medium Risk   | [M-05] Transfer of ERC20 tokens will fail                                                             |
-| Low Risk      | [L-01] Missing Events for Critical Functions                                                                                          |
-| Low Risk      | [L-02] Use Ownable2Step instead of Ownable                                                                                             |
-| Low Risk      | [L-03] Unspecific Compiler Version Pragma                                                                                              |
-| Gas Saving    | [G-01] Nesting if-statements is cheaper than using &&                                                                                  |
-| Gas Saving    | [G-02] Cache array length outside of loop                                                                                              |
-| Gas Saving    | [G-03] Use Custom Errors                                                                                                               |
-| Gas Saving    | [G-04] Using `private` rather than `public` for constants, saves gas                                                                   |
+
+| **Severity**    | **Title** |
+|---------------|-----------------------------------------------------------------|
+| **High Risk** | [H-01] **Missing `burn()` and `burnFrom()` Functions** → No way to reduce total supply. |
+| **High Risk** | [H-02] **Unsafe ERC20 Transfers Using `.call()`** → Fails for non-standard ERC20 tokens like USDT. |
+| **Medium Risk** | [M-01] **Excessive Centralization Risk by Owner** → Owner has unrestricted minting and blacklisting control. |
+| **Medium Risk** | [M-02] **Lack of Validation in `updateTLWallet()` and `updateTaxWallet()`** → No check for `address(0)`. |
+| **Medium Risk** | [M-03] **Missing `permit()` Function for Off-Chain Approvals (EIP-2612 Support)** → Gasless approvals are impossible. |
+| **Medium Risk** | [M-04] **Missing `transfer()` and `transferFrom()` Functions** → Explicit transfer functions are required for compatibility. |
+| **Low Risk** | [L-01] **Missing Events for Critical Functions (`pause()` and `unpause()`)** → No way to track these actions on-chain. |
+| **Low Risk** | [L-02] **Use `Ownable2Step` Instead of `Ownable` for Safer Ownership Transfers**. |
+| **Low Risk** | [L-03] **Unspecific Compiler Version Pragma** → Can cause unexpected compilation behavior. |
+| **Gas Saving** | [G-01] **Nesting `if`-statements is Cheaper than Using `&&`**. |
+| **Gas Saving** | [G-02] **Cache Array Length Outside of Loops to Reduce Storage Reads**. |
+| **Gas Saving** | [G-03] **Use Custom Errors Instead of String Reverts to Save Gas**. |
+| **Gas Saving** | [G-04] **Using `private` Rather than `public` for Constants Saves Gas**. |
 
 
 
@@ -174,6 +172,42 @@ function withdrawStuckTokens(address token, address to) external onlyOwner {
 ```
 
 
+
+### Issue: Missing `transfer()` and `transferFrom()` Functions
+
+#### **Overview**
+The contract **does not define** the standard ERC20 functions **`transfer()`** and **`transferFrom()`**, which are **essential** for token transfers.  
+
+Although the contract extends **ERC20**, which includes these functions, they are **not explicitly defined** in the contract. According to the **GELT functions file**, these functions **should exist explicitly** in the contract.  
+
+
+## **Issue Details**
+- **`transfer(address to, uint256 amount)`** is the core function used to send tokens from the caller to another address.
+- **Currently, it is missing**, meaning the contract does not explicitly show support for direct token transfers.
+
+
+- **`transferFrom(address from, address to, uint256 amount)`** allows an approved spender to transfer tokens **on behalf of the token owner**.
+- **Currently, it is missing**, meaning the contract does not explicitly allow delegated transfers.
+
+
+## Proposed Fix**
+### Explicitly Define `transfer()` Function
+```solidity
+function transfer(address to, uint256 amount) public override returns (bool) {
+    require(to != address(0), "Invalid recipient");
+    return super.transfer(to, amount);
+}
+```
+
+### Explicitly Define `transferFrom()` Function
+```solidity
+function transferFrom(address from, address to, uint256 amount) public override returns (bool) {
+    require(to != address(0), "Invalid recipient");
+    return super.transferFrom(from, to, amount);
+}
+```
+
+
 ## Low Severity
 
 ### Issue 4: Lack of Validation in `updateTLWallet()` and `updateTaxWallet()` Functions**
@@ -249,38 +283,5 @@ function permit(
 
 
 
-### Issue: Missing `transfer()` and `transferFrom()` Functions
-
-#### **Overview**
-The contract **does not define** the standard ERC20 functions **`transfer()`** and **`transferFrom()`**, which are **essential** for token transfers.  
-
-Although the contract extends **ERC20**, which includes these functions, they are **not explicitly defined** in the contract. According to the **GELT functions file**, these functions **should exist explicitly** in the contract.  
-
-
-## **Issue Details**
-- **`transfer(address to, uint256 amount)`** is the core function used to send tokens from the caller to another address.
-- **Currently, it is missing**, meaning the contract does not explicitly show support for direct token transfers.
-
-
-- **`transferFrom(address from, address to, uint256 amount)`** allows an approved spender to transfer tokens **on behalf of the token owner**.
-- **Currently, it is missing**, meaning the contract does not explicitly allow delegated transfers.
-
-
-## Proposed Fix**
-### Explicitly Define `transfer()` Function
-```solidity
-function transfer(address to, uint256 amount) public override returns (bool) {
-    require(to != address(0), "Invalid recipient");
-    return super.transfer(to, amount);
-}
-```
-
-### Explicitly Define `transferFrom()` Function
-```solidity
-function transferFrom(address from, address to, uint256 amount) public override returns (bool) {
-    require(to != address(0), "Invalid recipient");
-    return super.transferFrom(from, to, amount);
-}
-```
 
 
