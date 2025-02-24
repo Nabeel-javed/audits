@@ -68,19 +68,12 @@ GELT is built on a decentralized blockchain infrastructure designed to ensure tr
 
 | **Severity**    | **Title** |
 |---------------|-----------------------------------------------------------------|
-| **High Risk** | [H-01] **Missing `burn()` and `burnFrom()` Functions** → No way to reduce total supply. |
-| **High Risk** | [H-02] **Unsafe ERC20 Transfers Using `.call()`** → Fails for non-standard ERC20 tokens like USDT. |
-| **Medium Risk** | [M-01] **Excessive Centralization Risk by Owner** → Owner has unrestricted minting and blacklisting control. |
-| **Medium Risk** | [M-02] **Lack of Validation in `updateTLWallet()` and `updateTaxWallet()`** → No check for `address(0)`. |
-| **Medium Risk** | [M-03] **Missing `permit()` Function for Off-Chain Approvals (EIP-2612 Support)** → Gasless approvals are impossible. |
-| **Medium Risk** | [M-04] **Missing `transfer()` and `transferFrom()` Functions** → Explicit transfer functions are required for compatibility. |
-| **Low Risk** | [L-01] **Missing Events for Critical Functions (`pause()` and `unpause()`)** → No way to track these actions on-chain. |
-| **Low Risk** | [L-02] **Use `Ownable2Step` Instead of `Ownable` for Safer Ownership Transfers**. |
-| **Low Risk** | [L-03] **Unspecific Compiler Version Pragma** → Can cause unexpected compilation behavior. |
-| **Gas Saving** | [G-01] **Nesting `if`-statements is Cheaper than Using `&&`**. |
-| **Gas Saving** | [G-02] **Cache Array Length Outside of Loops to Reduce Storage Reads**. |
-| **Gas Saving** | [G-03] **Use Custom Errors Instead of String Reverts to Save Gas**. |
-| **Gas Saving** | [G-04] **Using `private` Rather than `public` for Constants Saves Gas**. |
+| **High Risk** | [H-01] **Missing `burn()` and `burnFrom()` Functions |
+| **Medium Risk** | [H-02] **Unsafe ERC20 Token Transfers Using `.call() |
+| **Medium Risk** | [M-01] **Missing `transfer()` and `transferFrom()` Functions |
+| **Low Risk** | [L-01] **Lack of Validation in `updateTLWallet()` and `updateTaxWallet()` Functions |
+| **Low Risk** | [L-03] **Missing permit() Function for Off-Chain Approvals (EIP-2612 Support. |
+| **Gas Saving** | [G-02] **Cache array length outside of loop**. |
 
 
 
@@ -90,7 +83,7 @@ GELT is built on a decentralized blockchain infrastructure designed to ensure tr
 
 ## High Severity
 
-### **Issue: Missing `burn()` and `burnFrom()` Functions**  
+### **Issue 1 : Missing `burn()` and `burnFrom()` Functions**  
 
 #### **Overview**  
 The `TreasuryLari` contract does **not implement token burning functions**, meaning tokens cannot be permanently removed from circulation. This limits token supply management and may affect long-term economic strategies like deflationary mechanics.  
@@ -132,7 +125,7 @@ function burnFrom(address account, uint256 amount) external {
 
 ## Medium severity
 
-## Issue: Unsafe ERC20 Token Transfers Using `.call()`
+## Issue 2: Unsafe ERC20 Token Transfers Using `.call()`
 
 ### Overview
 In Solidity, using `.call()` to transfer ERC20 tokens is **not recommended** because it can fail for **non-standard ERC20 tokens** like USDT, BNB, and MKR. Some ERC20 tokens do not return a boolean (`true`) on `transfer()`, causing `.call()` to fail unexpectedly.  
@@ -173,7 +166,7 @@ function withdrawStuckTokens(address token, address to) external onlyOwner {
 
 
 
-### Issue: Missing `transfer()` and `transferFrom()` Functions
+### Issue 3: Missing `transfer()` and `transferFrom()` Functions
 
 #### **Overview**
 The contract **does not define** the standard ERC20 functions **`transfer()`** and **`transferFrom()`**, which are **essential** for token transfers.  
@@ -190,7 +183,7 @@ Although the contract extends **ERC20**, which includes these functions, they ar
 - **Currently, it is missing**, meaning the contract does not explicitly allow delegated transfers.
 
 
-## Proposed Fix**
+## Proposed Fix
 ### Explicitly Define `transfer()` Function
 ```solidity
 function transfer(address to, uint256 amount) public override returns (bool) {
@@ -247,7 +240,8 @@ function updateTaxWallet(address newWallet) external onlyOwner {
 ```
 
 
-### Issue 5: Missing `permit()` Function for Off-Chain Approvals (EIP-2612 Support  
+
+### Issue 5: Missing permit() Function for Off-Chain Approvals (EIP-2612 Support
 
 #### Overview  
 The contract extends `ERC20Permit`, but **does not explicitly define the `permit()` function**, making it impossible to use **off-chain approvals** that reduce gas costs for users.  
@@ -274,7 +268,12 @@ function permit(
 }
 ```
 
+## Gas Severity
 
+### Issue 1: Cache array length outside of loop
+
+## Overview:
+In the `blockUsers` and `unblockUsers` function the array is not being cached before the loop and is being read froms storage on every ilteration so the solidity compiler will always read the length of the array during each iteration this is an extra sload operation (100 additional extra gas for each iteration except for the first)
 
 
 
