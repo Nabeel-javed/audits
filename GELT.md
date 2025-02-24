@@ -44,12 +44,14 @@ GELT is built on a decentralized blockchain infrastructure designed to ensure tr
 
 ## Executive summary
 
-### Overview
+## Overview
 
-| :------------ | :------------------------------------------------------------------------------------------- |
-| Project Name  | GELT                                                                                  |
-| Repository    | https://github.com/MDulquerS/TreasuryLari-StableCoin/blob/main/src/TreasuryLari.sol
-| Methods       | Static + Manual review                                                                                |
+| Attribute     | Details |
+|--------------|---------|
+| **Project Name** | GELT |
+| **Repository** | [TreasuryLari.sol](https://github.com/MDulquerS/TreasuryLari-StableCoin/blob/main/src/TreasuryLari.sol) |
+| **Methods** | Static Analysis + Manual Review |
+
 
 ### Issues found
 
