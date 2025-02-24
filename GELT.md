@@ -13,7 +13,7 @@ as possible. Audits can show the presence of vulnerabilities **but not their abs
 \- Secureum
 
 ## About GELT
-GELT is built on a decentralized blockchain infrastructure designed to ensure transparency, security, and immutability of transactions. By leveraging the power of blockchain, GELT aims to create an efficient financial ecosystem with:
+GELT is built on a decentralized blockchain infrastructure designed to ensure transparency, security, and immutability of transactions. By leveraging the power of blockchain, GELT aims to create an efficient financial ecosystem.
 
 
 ## Risk classification
@@ -69,7 +69,7 @@ GELT is built on a decentralized blockchain infrastructure designed to ensure tr
 | **Medium Risk** | [H-02] **Unsafe ERC20 Token Transfers Using `.call() |
 | **Medium Risk** | [M-01] **Missing `transfer()` and `transferFrom()` Functions |
 | **Low Risk** | [L-01] **Lack of Validation in `updateTLWallet()` and `updateTaxWallet()` Functions |
-| **Low Risk** | [L-03] **Missing permit() Function for Off-Chain Approvals (EIP-2612 Support. |
+| **Low Risk** | [L-03] **Missing permit() Function for Off-Chain Approvals (EIP-2612 Support). |
 | **Gas Saving** | [G-02] **Cache array length outside of loop**. |
 
 
@@ -199,7 +199,7 @@ function transferFrom(address from, address to, uint256 amount) public override 
 
 ## Low Severity
 
-## Issue 4: Lack of Validation in `updateTLWallet()` and `updateTaxWallet()` Functions**
+## Issue 4: Lack of Validation in `updateTLWallet()` and `updateTaxWallet()` Functions (Already in known issues)**
 
 ### Overview
 The `updateTLWallet()` and `updateTaxWallet()` functions allow the owner to change the treasury and tax wallet addresses. However, these functions **do not validate the new addresses**, which introduces potential risks.  
@@ -237,7 +237,7 @@ function updateTaxWallet(address newWallet) external onlyOwner {
 
 
 
-## Issue 5: Missing permit() Function for Off-Chain Approvals (EIP-2612 Support
+## Issue 5: Missing permit() Function for Off-Chain Approvals (EIP-2612 Support)
 
 ### Overview  
 The contract extends `ERC20Permit`, but **does not explicitly define the `permit()` function**, making it impossible to use **off-chain approvals** that reduce gas costs for users.  
