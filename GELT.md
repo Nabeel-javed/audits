@@ -162,9 +162,9 @@ function withdrawStuckTokens(address token, address to) external onlyOwner {
 
 
 
-### Issue 3: Missing `transfer()` and `transferFrom()` Functions
+## Issue 3: Missing `transfer()` and `transferFrom()` Functions
 
-#### **Overview**
+### **Overview**
 The contract **does not define** the standard ERC20 functions **`transfer()`** and **`transferFrom()`**, which are **essential** for token transfers.  
 
 Although the contract extends **ERC20**, which includes these functions, they are **not explicitly defined** in the contract. According to the **GELT functions file**, these functions **should exist explicitly** in the contract.  
@@ -199,9 +199,9 @@ function transferFrom(address from, address to, uint256 amount) public override 
 
 ## Low Severity
 
-### Issue 4: Lack of Validation in `updateTLWallet()` and `updateTaxWallet()` Functions**
+## Issue 4: Lack of Validation in `updateTLWallet()` and `updateTaxWallet()` Functions**
 
-#### Overview
+### Overview
 The `updateTLWallet()` and `updateTaxWallet()` functions allow the owner to change the treasury and tax wallet addresses. However, these functions **do not validate the new addresses**, which introduces potential risks.  
 
 
@@ -237,9 +237,9 @@ function updateTaxWallet(address newWallet) external onlyOwner {
 
 
 
-### Issue 5: Missing permit() Function for Off-Chain Approvals (EIP-2612 Support
+## Issue 5: Missing permit() Function for Off-Chain Approvals (EIP-2612 Support
 
-#### Overview  
+### Overview  
 The contract extends `ERC20Permit`, but **does not explicitly define the `permit()` function**, making it impossible to use **off-chain approvals** that reduce gas costs for users.  
 
 ## Issue Details  
@@ -266,7 +266,7 @@ function permit(
 
 ## Gas Severity
 
-### Issue 1: Cache array length outside of loop
+## Issue 1: Cache array length outside of loop
 
 ## Overview:
 In the `blockUsers` and `unblockUsers` function the array is not being cached before the loop and is being read froms storage on every ilteration so the solidity compiler will always read the length of the array during each iteration this is an extra sload operation (100 additional extra gas for each iteration except for the first)
