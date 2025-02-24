@@ -58,10 +58,10 @@ GELT is built on a decentralized blockchain infrastructure designed to ensure tr
 
 | Severity      |                                                     Count |
 | :------------ | --------------------------------------------------------: |
-| High risk     |       4 |
-| Medium risk   |     5 |
-| Low risk      |       3 |
-| Gas Saving | 4 |
+| High risk     |       1 |
+| Medium risk   |     2 |
+| Low risk      |       2 |
+| Gas Saving | 1 |
 
 ### Issues Summary
 
