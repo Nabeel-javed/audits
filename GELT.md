@@ -109,11 +109,11 @@ The `TreasuryLari` contract does **not implement token burning functions**, mean
 
 
 ## **Issue Details**
-### ** No `burn()` Function for Users**
+### No `burn()` Function for Users
 - In standard ERC20 implementations, users should be able to **destroy their own tokens** to reduce supply.
 - The absence of a `burn()` function means users **cannot voluntarily remove tokens** from their balance.
 
-### ** No `burnFrom()` for Approved Spending**
+###  No `burnFrom()` for Approved Spending
 - ERC20 tokens typically include a `burnFrom()` function that allows an **approved spender** to burn tokens on behalf of an address.
 - Since the contract lacks `burnFrom()`, even if a user **approves** another wallet (or a contract) to use their tokens, the approved spender **cannot burn them**.
 
@@ -129,7 +129,7 @@ function burn(uint256 amount) external {
 
 ---
 
-### ** Add `burnFrom()` for Approved Spenders**
+###  Add `burnFrom()` for Approved Spenders
 ```solidity
 function burnFrom(address account, uint256 amount) external {
     uint256 currentAllowance = allowance(account, msg.sender);
@@ -144,9 +144,9 @@ function burnFrom(address account, uint256 amount) external {
 
 ## Medium severity
 
-## **Issue: Unsafe ERC20 Token Transfers Using `.call()`**
+## Issue: Unsafe ERC20 Token Transfers Using `.call()`
 
-### **Overview**
+### Overview
 In Solidity, using `.call()` to transfer ERC20 tokens is **not recommended** because it can fail for **non-standard ERC20 tokens** like USDT, BNB, and MKR. Some ERC20 tokens do not return a boolean (`true`) on `transfer()`, causing `.call()` to fail unexpectedly.  
 
 ```solidity
@@ -159,7 +159,7 @@ if (!success || (data.length != 0 && !abi.decode(data, (bool)))) {
 ```
 
 
-### **Why `.call()` is Problematic?**
+### Why `.call()` is Problematic?
 1. **Non-Standard ERC20 Behavior**  
    - Some tokens do not return a boolean (`true`) on `transfer()`.
    - `.call()` expects a return value and fails if the token does not provide it.
@@ -169,7 +169,7 @@ if (!success || (data.length != 0 && !abi.decode(data, (bool)))) {
    - `.call()` will **fail on these tokens**.
 
 
-### **Recommended Fix:**
+### Recommended Fix:
 ```solidity
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
@@ -188,17 +188,17 @@ function withdrawStuckTokens(address token, address to) external onlyOwner {
 
 ### Issue 4: Lack of Validation in `updateTLWallet()` and `updateTaxWallet()` Functions**
 
-#### **Overview**  
+#### Overview
 The `updateTLWallet()` and `updateTaxWallet()` functions allow the owner to change the treasury and tax wallet addresses. However, these functions **do not validate the new addresses**, which introduces potential risks.  
 
 
-## **Issue Details**  
+## Issue Details  
 **Risk of Setting `address(0)` (Zero Address)**
 - The contract **does not check** whether the new wallet address is `address(0)`.  
 - If the owner mistakenly or maliciously sets the treasury or tax wallet to `0x0000000000000000000000000000000000000000`, all future operations related to these wallets will **fail**.  
 
 
-## **Proposed Fix**
+## Proposed Fix
 
 **Add Input Validation in `updateTLWallet()`**
 ```solidity
@@ -223,20 +223,18 @@ function updateTaxWallet(address newWallet) external onlyOwner {
 ```
 
 
-### **Issue 5: Missing `permit()` Function for Off-Chain Approvals (EIP-2612 Support)**  
+### Issue 5: Missing `permit()` Function for Off-Chain Approvals (EIP-2612 Support  
 
-#### **Overview**  
+#### Overview  
 The contract extends `ERC20Permit`, but **does not explicitly define the `permit()` function**, making it impossible to use **off-chain approvals** that reduce gas costs for users.  
 
----
-
-## **Issue Details**  
+## Issue Details  
 - The contract inherits `ERC20Permit`, but it **does not expose the `permit()` function**.  
 - This means **wallets and dApps cannot interact with it properly**, making the permit functionality **unusable**.
 
 
 
-## **Proposed Fix**
+## Proposed Fix
 
 ```solidity
 function permit(
