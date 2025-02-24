@@ -109,17 +109,17 @@ The `TreasuryLari` contract does **not implement token burning functions**, mean
 
 
 ## **Issue Details**
-### **1️⃣ No `burn()` Function for Users**
+### ** No `burn()` Function for Users**
 - In standard ERC20 implementations, users should be able to **destroy their own tokens** to reduce supply.
 - The absence of a `burn()` function means users **cannot voluntarily remove tokens** from their balance.
 
-### **2️⃣ No `burnFrom()` for Approved Spending**
+### ** No `burnFrom()` for Approved Spending**
 - ERC20 tokens typically include a `burnFrom()` function that allows an **approved spender** to burn tokens on behalf of an address.
 - Since the contract lacks `burnFrom()`, even if a user **approves** another wallet (or a contract) to use their tokens, the approved spender **cannot burn them**.
 
 
-## **Recommended Fix: **
-### ** Add `burn()` for Users to Burn Their Own Tokens**
+## Recommended Fix: 
+### Add `burn()` for Users to Burn Their Own Tokens
 ```solidity
 function burn(uint256 amount) external {
     require(amount > 0, "Burn amount must be greater than zero");
@@ -182,3 +182,73 @@ function withdrawStuckTokens(address token, address to) external onlyOwner {
     SafeERC20.safeTransfer(IERC20(token), to, tbalance);
 }
 ```
+
+
+## Low Severity
+
+### Issue 4: Lack of Validation in `updateTLWallet()` and `updateTaxWallet()` Functions**
+
+#### **Overview**  
+The `updateTLWallet()` and `updateTaxWallet()` functions allow the owner to change the treasury and tax wallet addresses. However, these functions **do not validate the new addresses**, which introduces potential risks.  
+
+
+## **Issue Details**  
+**Risk of Setting `address(0)` (Zero Address)**
+- The contract **does not check** whether the new wallet address is `address(0)`.  
+- If the owner mistakenly or maliciously sets the treasury or tax wallet to `0x0000000000000000000000000000000000000000`, all future operations related to these wallets will **fail**.  
+
+
+## **Proposed Fix**
+
+**Add Input Validation in `updateTLWallet()`**
+```solidity
+function updateTLWallet(address newWallet) external onlyOwner {
+    require(newWallet != address(0), "Invalid wallet address");
+    require(newWallet != TLWallet, "New wallet must be different from the current one");
+    
+    TLWallet = newWallet;
+    emit UpdatedTLWallet(newWallet);
+}
+```
+
+ **Add Input Validation in `updateTaxWallet()`**
+```solidity
+function updateTaxWallet(address newWallet) external onlyOwner {
+    require(newWallet != address(0), "Invalid tax wallet address");
+    require(newWallet != taxWallet, "New wallet must be different from the current one");
+
+    taxWallet = newWallet;
+    emit UpdatedTaxWallet(newWallet);
+}
+```
+
+
+### **Issue 5: Missing `permit()` Function for Off-Chain Approvals (EIP-2612 Support)**  
+
+#### **Overview**  
+The contract extends `ERC20Permit`, but **does not explicitly define the `permit()` function**, making it impossible to use **off-chain approvals** that reduce gas costs for users.  
+
+---
+
+## **Issue Details**  
+- The contract inherits `ERC20Permit`, but it **does not expose the `permit()` function**.  
+- This means **wallets and dApps cannot interact with it properly**, making the permit functionality **unusable**.
+
+
+
+## **Proposed Fix**
+
+```solidity
+function permit(
+    address owner,
+    address spender,
+    uint256 value,
+    uint256 deadline,
+    uint8 v,
+    bytes32 r,
+    bytes32 s
+) external {
+    _permit(owner, spender, value, deadline, v, r, s);
+}
+```
+
