@@ -49,8 +49,8 @@ Mprofy DAO is a decentralized platform designed to empower the existing Mprofy c
 
 |               |                                                                                              |
 | :------------ | :------------------------------------------------------------------------------------------- |
-| Project Name  | MProfy-Dao-Web3                                                                                       |
-| Repository    | https://github.com/DhruvGodambe/mprofy-dao-web3  
+| Project Name  | GELT                                                                                  |
+| Repository    | https://github.com/MDulquerS/TreasuryLari-StableCoin/blob/main/src/TreasuryLari.sol
 | Methods       | Static + Manual review                                                                                |
 |               |
 
@@ -99,13 +99,54 @@ Mprofy DAO is a decentralized platform designed to empower the existing Mprofy c
 
 # Findings
 
-## High severity
+
+## High Severity
+
+### **Issue: Missing `burn()` and `burnFrom()` Functions**  
+
+#### **Overview**  
+The `TreasuryLari` contract does **not implement token burning functions**, meaning tokens cannot be permanently removed from circulation. This limits token supply management and may affect long-term economic strategies like deflationary mechanics.  
+
+
+## **Issue Details**
+### **1️⃣ No `burn()` Function for Users**
+- In standard ERC20 implementations, users should be able to **destroy their own tokens** to reduce supply.
+- The absence of a `burn()` function means users **cannot voluntarily remove tokens** from their balance.
+
+### **2️⃣ No `burnFrom()` for Approved Spending**
+- ERC20 tokens typically include a `burnFrom()` function that allows an **approved spender** to burn tokens on behalf of an address.
+- Since the contract lacks `burnFrom()`, even if a user **approves** another wallet (or a contract) to use their tokens, the approved spender **cannot burn them**.
+
+
+## **Recommended Fix: **
+### ** Add `burn()` for Users to Burn Their Own Tokens**
+```solidity
+function burn(uint256 amount) external {
+    require(amount > 0, "Burn amount must be greater than zero");
+    _burn(msg.sender, amount);
+}
+```
+
+---
+
+### ** Add `burnFrom()` for Approved Spenders**
+```solidity
+function burnFrom(address account, uint256 amount) external {
+    uint256 currentAllowance = allowance(account, msg.sender);
+    require(currentAllowance >= amount, "Burn amount exceeds allowance");
+
+    _approve(account, msg.sender, currentAllowance - amount);
+    _burn(account, amount);
+}
+```
 
 
 
-# **Issue: Unsafe ERC20 Token Transfers Using `.call()`**
+## Medium severity
 
-## **Overview**
+## **Issue: Unsafe ERC20 Token Transfers Using `.call()`**
+
+### **Overview**
 In Solidity, using `.call()` to transfer ERC20 tokens is **not recommended** because it can fail for **non-standard ERC20 tokens** like USDT, BNB, and MKR. Some ERC20 tokens do not return a boolean (`true`) on `transfer()`, causing `.call()` to fail unexpectedly.  
 
 ```solidity
@@ -116,12 +157,9 @@ if (!success || (data.length != 0 && !abi.decode(data, (bool)))) {
     revert TransferFailed();
 }
 ```
-✅ **Works for standard ERC20 tokens.**  
-❌ **Fails for non-compliant tokens like USDT because they do not return `true`.**  
 
----
 
-## **Why `.call()` is Problematic?**
+### **Why `.call()` is Problematic?**
 1. **Non-Standard ERC20 Behavior**  
    - Some tokens do not return a boolean (`true`) on `transfer()`.
    - `.call()` expects a return value and fails if the token does not provide it.
