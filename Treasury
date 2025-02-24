@@ -101,40 +101,48 @@ Mprofy DAO is a decentralized platform designed to empower the existing Mprofy c
 
 ## High severity
 
-### [H-01] Excessive Proposal Fee sent by user is lost
 
-#### Description:
-In the `createProposal()` function, the requirement is that users send a minimum fee of `CREATE_PROPOSAL_COST` to create a proposal. However, if a user sends more than the required fee there is no advantage of it and, the excess amount is not refunded. This could lead to user may unintentionally overpay without being refunded.
+
+# **Issue: Unsafe ERC20 Token Transfers Using `.call()`**
+
+## **Overview**
+In Solidity, using `.call()` to transfer ERC20 tokens is **not recommended** because it can fail for **non-standard ERC20 tokens** like USDT, BNB, and MKR. Some ERC20 tokens do not return a boolean (`true`) on `transfer()`, causing `.call()` to fail unexpectedly.  
 
 ```solidity
-require(
-    msg.value >= CREATE_PROPOSAL_COST,
-    "Amount too low for creating proposal"
+(bool success, bytes memory data) = address(token).call(
+    abi.encodeWithSelector(IERC20.transfer.selector, to, tbalance)
 );
+if (!success || (data.length != 0 && !abi.decode(data, (bool)))) {
+    revert TransferFailed();
+}
 ```
+✅ **Works for standard ERC20 tokens.**  
+❌ **Fails for non-compliant tokens like USDT because they do not return `true`.**  
 
-There is no logic to handle cases where the user sends more than `CREATE_PROPOSAL_COST`. As a result, any excess ETH sent is effectively "lost" to the contract.
+---
 
-#### Recommendation:
-Introduce a logic to refund the excess ETH amount back to the user if they send more than the required proposal creation fee.
+## **Why `.call()` is Problematic?**
+1. **Non-Standard ERC20 Behavior**  
+   - Some tokens do not return a boolean (`true`) on `transfer()`.
+   - `.call()` expects a return value and fails if the token does not provide it.
+
+2. **Lack of Compatibility with Certain ERC20 Tokens**  
+   - Tokens like **USDT, MKR, and BNB** do not strictly adhere to ERC20’s expected `transfer()` return value.
+   - `.call()` will **fail on these tokens**.
 
 
+### **Recommended Fix:**
 ```solidity
-require(
-    msg.value >= CREATE_PROPOSAL_COST,
-    "Amount too low for creating proposal"
-);
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
-// If user sends more than the required fee, refund the excess
-uint excessAmount = msg.value - CREATE_PROPOSAL_COST;
-if (excessAmount > 0) {
-    payable(msg.sender).call{value: excessAmount}(""); // Refund excess
+function withdrawStuckTokens(address token, address to) external onlyOwner {
+    require(to != address(0), "Invalid recipient");
 
+    uint256 tbalance = IERC20(token).balanceOf(address(this));
+    require(tbalance > 0, "No token balance");
+
+    SafeERC20.safeTransfer(IERC20(token), to, tbalance);
 }
 ```
 
-This way, users will only be charged the exact amount needed to create the proposal, and any extra ETH sent will be safely refunded to their wallet.
-
-#### Resolution:
-Solved 
 
