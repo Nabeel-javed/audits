@@ -250,3 +250,47 @@ function permit(
 }
 ```
 
+
+
+
+
+
+
+
+
+
+### Issue: Missing `transfer()` and `transferFrom()` Functions
+
+#### **Overview**
+The contract **does not define** the standard ERC20 functions **`transfer()`** and **`transferFrom()`**, which are **essential** for token transfers.  
+
+Although the contract extends **ERC20**, which includes these functions, they are **not explicitly defined** in the contract. According to the **GELT functions file**, these functions **should exist explicitly** in the contract.  
+
+
+## **Issue Details**
+- **`transfer(address to, uint256 amount)`** is the core function used to send tokens from the caller to another address.
+- **Currently, it is missing**, meaning the contract does not explicitly show support for direct token transfers.
+
+
+- **`transferFrom(address from, address to, uint256 amount)`** allows an approved spender to transfer tokens **on behalf of the token owner**.
+- **Currently, it is missing**, meaning the contract does not explicitly allow delegated transfers.
+
+
+## Proposed Fix**
+### Explicitly Define `transfer()` Function
+```solidity
+function transfer(address to, uint256 amount) public override returns (bool) {
+    require(to != address(0), "Invalid recipient");
+    return super.transfer(to, amount);
+}
+```
+
+### Explicitly Define `transferFrom()` Function
+```solidity
+function transferFrom(address from, address to, uint256 amount) public override returns (bool) {
+    require(to != address(0), "Invalid recipient");
+    return super.transferFrom(from, to, amount);
+}
+```
+
+
