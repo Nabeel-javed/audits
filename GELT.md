@@ -57,9 +57,9 @@ GELT is built on a decentralized blockchain infrastructure designed to ensure tr
 
 | Severity      |                                                     Count |
 | :------------ | --------------------------------------------------------: |
-| High risk     |       1 |
-| Medium risk   |     2 |
-| Low risk      |       2 |
+| High risk     |       |
+| Medium risk   ||
+| Low risk      |     |
 | Gas Saving | 1 |
 
 ### Issues Summary
@@ -80,45 +80,6 @@ GELT is built on a decentralized blockchain infrastructure designed to ensure tr
 # Findings
 
 
-## High Severity
-
-### **Issue 1 : Missing `burn()` and `burnFrom()` Functions**  
-
-#### **Overview**  
-The `TreasuryLari` contract does **not implement token burning functions**, meaning tokens cannot be permanently removed from circulation. This limits token supply management and may affect long-term economic strategies like deflationary mechanics.  
-
-
-## **Issue Details**
-### No `burn()` Function for Users
-- In standard ERC20 implementations, users should be able to **destroy their own tokens** to reduce supply.
-- The absence of a `burn()` function means users **cannot voluntarily remove tokens** from their balance.
-
-###  No `burnFrom()` for Approved Spending
-- ERC20 tokens typically include a `burnFrom()` function that allows an **approved spender** to burn tokens on behalf of an address.
-- Since the contract lacks `burnFrom()`, even if a user **approves** another wallet (or a contract) to use their tokens, the approved spender **cannot burn them**.
-
-
-## Recommended Fix: 
-### Add `burn()` for Users to Burn Their Own Tokens
-```solidity
-function burn(uint256 amount) external {
-    require(amount > 0, "Burn amount must be greater than zero");
-    _burn(msg.sender, amount);
-}
-```
-
-
-
-###  Add `burnFrom()` for Approved Spenders
-```solidity
-function burnFrom(address account, uint256 amount) external {
-    uint256 currentAllowance = allowance(account, msg.sender);
-    require(currentAllowance >= amount, "Burn amount exceeds allowance");
-
-    _approve(account, msg.sender, currentAllowance - amount);
-    _burn(account, amount);
-}
-```
 
 
 
@@ -161,42 +122,10 @@ function withdrawStuckTokens(address token, address to) external onlyOwner {
     SafeERC20.safeTransfer(IERC20(token), to, tbalance);
 }
 ```
+### Resolution
+Solved by removing `.call` function.
 
 
-
-## Issue 3: Missing `transfer()` and `transferFrom()` Functions
-
-### **Overview**
-The contract **does not define** the standard ERC20 functions **`transfer()`** and **`transferFrom()`**, which are **essential** for token transfers.  
-
-Although the contract extends **ERC20**, which includes these functions, they are **not explicitly defined** in the contract. According to the **GELT functions file**, these functions **should exist explicitly** in the contract.  
-
-
-## **Issue Details**
-- **`transfer(address to, uint256 amount)`** is the core function used to send tokens from the caller to another address.
-- **Currently, it is missing**, meaning the contract does not explicitly show support for direct token transfers.
-
-
-- **`transferFrom(address from, address to, uint256 amount)`** allows an approved spender to transfer tokens **on behalf of the token owner**.
-- **Currently, it is missing**, meaning the contract does not explicitly allow delegated transfers.
-
-
-## Proposed Fix
-### Explicitly Define `transfer()` Function
-```solidity
-function transfer(address to, uint256 amount) public override returns (bool) {
-    require(to != address(0), "Invalid recipient");
-    return super.transfer(to, amount);
-}
-```
-
-### Explicitly Define `transferFrom()` Function
-```solidity
-function transferFrom(address from, address to, uint256 amount) public override returns (bool) {
-    require(to != address(0), "Invalid recipient");
-    return super.transferFrom(from, to, amount);
-}
-```
 
 
 ## Low Severity
@@ -238,43 +167,21 @@ function updateTaxWallet(address newWallet) external onlyOwner {
 ```
 
 
-
-## Issue 5: Missing permit() Function for Off-Chain Approvals (EIP-2612 Support)
-
-### Overview  
-The contract extends `ERC20Permit`, but **does not explicitly define the `permit()` function**, making it impossible to use **off-chain approvals** that reduce gas costs for users.  
-
-## Issue Details  
-- The contract inherits `ERC20Permit`, but it **does not expose the `permit()` function**.  
-- This means **wallets and dApps cannot interact with it properly**, making the permit functionality **unusable**.
+### Resolution
+Solved by addion 0 address check
 
 
 
-## Proposed Fix
-
-```solidity
-function permit(
-    address owner,
-    address spender,
-    uint256 value,
-    uint256 deadline,
-    uint8 v,
-    bytes32 r,
-    bytes32 s
-) external {
-    _permit(owner, spender, value, deadline, v, r, s);
-}
-```
 
 ## Gas Severity
 
 ## Issue 1: Cache array length outside of loop
 
 ## Overview:
-In the `blockUsers` and `unblockUsers` function the array is not being cached before the loop and is being read froms storage on every ilteration so the solidity compiler will always read the length of the array during each iteration this is an extra sload operation (100 additional extra gas for each iteration except for the first)
+In the `blockUsers` and `unblockUsers` function the array is not being cached before the loop and is being read froms memory on every ilteration so the solidity compiler will always read the length of the array during each iteration this is an extra mload operation (3 additional gas for each iteration except for the first))
 
-
-
+### Resolution
+Solved by caching the array outside the loop
 
 
 
