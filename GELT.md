@@ -58,7 +58,7 @@ GELT is built on a decentralized blockchain infrastructure designed to ensure tr
 | Severity      |                                                     Count |
 | :------------ | --------------------------------------------------------: |
 | High risk     |       |
-| Medium risk   ||
+| Medium risk   | 1 |
 | Low risk      |     |
 | Gas Saving | 1 |
 
@@ -67,11 +67,8 @@ GELT is built on a decentralized blockchain infrastructure designed to ensure tr
 
 | **Severity**    | **Title** |
 |---------------|-----------------------------------------------------------------|
-| **High Risk** | [H-01] **Missing `burn()` and `burnFrom()` Functions |
-| **Medium Risk** | [H-02] **Unsafe ERC20 Token Transfers Using `.call() |
-| **Medium Risk** | [M-01] **Missing `transfer()` and `transferFrom()` Functions |
+| **Medium Risk** | [M-01] **Unsafe ERC20 Token Transfers Using `.call() |
 | **Low Risk** | [L-01] **Lack of Validation in `updateTLWallet()` and `updateTaxWallet()` Functions |
-| **Low Risk** | [L-03] **Missing permit() Function for Off-Chain Approvals (EIP-2612 Support). |
 | **Gas Saving** | [G-02] **Cache array length outside of loop**. |
 
 
@@ -130,7 +127,7 @@ Solved by removing `.call` function.
 
 ## Low Severity
 
-## Issue 4: Lack of Validation in `updateTLWallet()` and `updateTaxWallet()` Functions (Already in known issues)**
+## Issue 2: Lack of Validation in `updateTLWallet()` and `updateTaxWallet()` Functions (Already in known issues)**
 
 ### Overview
 The `updateTLWallet()` and `updateTaxWallet()` functions allow the owner to change the treasury and tax wallet addresses. However, these functions **do not validate the new addresses**, which introduces potential risks.  
@@ -184,8 +181,8 @@ In the `blockUsers` and `unblockUsers` function the array is not being cached be
 Solved by caching the array outside the loop
 
 
+## Issue 2: Nesting if-statements is cheaper than using &&
 
+## Overview:
 
-
-
-
+In `_update`, `enableRTFee` and `enableSFee` functions are using `And` condition which will consume more gas as compare to nested if-statement. Nesting if-statements avoids the stack operations of setting up and using an extra jumpdest, and saves 6 [gas](https://gist.github.com/IllIllI000/7f3b818abecfadbef93b894481ae7d19)
