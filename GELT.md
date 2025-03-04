@@ -127,7 +127,7 @@ Solved by removing `.call` function.
 
 ## Low Severity
 
-## Issue 2: Lack of Validation in `updateTLWallet()` and `updateTaxWallet()` Functions (Already in known issues)**
+## Issue 2: Lack of Validation in `updateTLWallet()` and `updateTaxWallet()` Functions (Already in known issues)
 
 ### Overview
 The `updateTLWallet()` and `updateTaxWallet()` functions allow the owner to change the treasury and tax wallet addresses. However, these functions **do not validate the new addresses**, which introduces potential risks.  
@@ -165,7 +165,7 @@ function updateTaxWallet(address newWallet) external onlyOwner {
 
 
 ### Resolution
-Solved by addion 0 address check
+Solved by adding 0 address check
 
 
 
