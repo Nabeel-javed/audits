@@ -67,9 +67,9 @@ GELT is built on a decentralized blockchain infrastructure designed to ensure tr
 
 | **Severity**    | **Title** |
 |---------------|-----------------------------------------------------------------|
-| **Medium Risk** | [M-01] **Unsafe ERC20 Token Transfers Using `.call() |
-| **Low Risk** | [L-01] **Lack of Validation in `updateTLWallet()` and `updateTaxWallet()` Functions |
-| **Gas Saving** | [G-02] **Cache array length outside of loop**. |
+| **Medium Risk** | [M-01] Unsafe ERC20 Token Transfers Using `.call() |
+| **Low Risk** | [L-01] Lack of Validation in `updateTLWallet()` and `updateTaxWallet()` Functions |
+| **Gas Saving** | [G-02] Cache array length outside of loop**. |
 
 
 
