@@ -147,78 +147,11 @@ require(amount >= MIN_LIQUIDITY_AMOUNT &&
         "Invalid mint amount");
 ```
 
-### Low Severity Issues
 
-#### 1. No Pool Existence Check
-
-**Issue**: The function doesn't check if the pool already exists before attempting to create it.
-
-**Code Location**:
-```solidity
-_createTitanWyvernPool(titanContractBalanceForInitialLiquidity, initialWyvernXLiquidityAmount);
-```
-
-**Recommendation**: Add a check before pool creation:
-
-```solidity
-// Before _createTitanWyvernPool call
-address computed = PoolAddress.computeAddress(
-    UNI_FACTORY,
-    PoolAddress.getPoolKey(
-        TITANX_ADDRESS < wyvernAddress ? TITANX_ADDRESS : wyvernAddress,
-        TITANX_ADDRESS < wyvernAddress ? wyvernAddress : TITANX_ADDRESS,
-        FEE_TIER
-    )
-);
-require(!_isContract(computed), "Pool already exists");
-```
-
-While this is a defensive measure, it's worth keeping as it prevents unexpected behavior if the pool already exists (which could happen if the contract is redeployed or in a testing environment).
 
 ### Informational Issues
 
-#### 1. Price Calculation Mechanism
-
-**Issue**: Initial price is calculated based on token amounts rather than market prices.
-
-**Code Location**:
-```solidity
-uint160 sqrtPX96 = uint160((sqrt((amount1 * 1e18) / amount0) * 2 ** 96) / 1e9);
-```
-
-**Detailed Explanation**:
-The current price calculation method in `_createTitanWyvernPool` determines the initial pool price based solely on the ratio of provided token amounts:
-
-```solidity
-uint160 sqrtPX96 = uint160((sqrt((amount1 * 1e18) / amount0) * 2 ** 96) / 1e9);
-```
-
-This approach has several implications:
-
-1. **Price Discovery**: The initial price is completely determined by the ratio of tokens provided, not by any external market data. If this ratio doesn't reflect the fair market value of the tokens, it creates immediate arbitrage opportunities.
-
-2. **Price Impact**: If the token amounts are chosen without considering existing markets or fair value, users interacting with the pool immediately after creation might experience significant price impact or unfavorable trades.
-
-3. **Technical Precision**: The calculation involves multiple mathematical operations that could introduce rounding errors. The division and square root operations can lose precision, especially with very large or small token amounts.
-
-4. **Adaptability**: The current method doesn't account for external market conditions or allow setting a specific price target regardless of the token amounts available.
-
-**Recommendation**: Consider providing a mechanism to set initial price based on external data:
-
-```solidity
-function createUniswapLiquidity(
-    uint256 initialWyvernXLiquidityAmount,
-    uint160 initialSqrtPrice // Optional parameter with default
-) external onlyOwner {
-    // Use provided initialSqrtPrice or calculate based on amounts if not provided
-    uint160 sqrtPriceToUse = initialSqrtPrice != 0 ? 
-        initialSqrtPrice : 
-        calculateSqrtPriceFromAmounts(amount0, amount1);
-    // Continue with pool creation using sqrtPriceToUse
-}
-```
-
-#### 2. Missing Event Emission
+#### 1. Missing Event Emission
 
 **Issue**: No event is emitted for this critical one-time initialization.
 
@@ -242,20 +175,6 @@ emit LiquidityInitialized(
     tokenLiquidityInfo.liquidity
 );
 ```
-
-## Cross-Contract Analysis
-
-1. **Synchronized Protection**: The WyvernX contract prevents multiple calls to `mintInitialLiquidity` through the `s_manaPoolMinted` flag, which helps mitigate the lack of a similar check in WyvernBuyAndBurn.
-
-2. **Trust Assumptions**: The WyvernX contract trusts the WyvernBuyAndBurn contract to request a reasonable amount of tokens.
-
-## Benefits of the Current Implementation
-
-The primary change (using pre-transferred TitanX tokens) has several benefits:
-
-1. **Clear Separation of Concerns**: Clearly separates funding (transferring TitanX to the contract) from liquidity creation.
-2. **Reduced Transaction Complexity**: No need to handle token transfers during liquidity creation.
-3. **Improved Test Isolation**: Easier to test the liquidity creation process independently.
 
 ## Conclusion
 
