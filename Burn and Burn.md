@@ -4,7 +4,7 @@
 
 ## Executive Summary
 
-A security review of the smart contract protocol was done by [0xepley](https://twitter.com/0xepley).  
+A security review of the `WyvernBuyAndBurn` smart contract was done by [0xepley](https://twitter.com/0xepley).  
 This audit report includes all the vulnerabilities, issues and code improvements found during the security review.
 
 
