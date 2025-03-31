@@ -14,7 +14,7 @@ The security review was conducted using a combination of static analysis tools a
 
 Key components of the methodology included:
 - Automated scanning using industry-standard static analysis tools
-- Manual code review line-by-line with particular attention to token handling mechanisms
+- Manual code review line-by-line with attention.
 - Evaluation of function validations and input sanitization
 - Analysis of gas optimization opportunities
 - Assessment of adherence to smart contract development best practices
