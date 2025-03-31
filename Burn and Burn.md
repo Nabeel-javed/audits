@@ -1,16 +1,16 @@
 
 
-# WyvernBuyAndBurn Liquidity Creation Audit Report 
+# WyvernBuyAndBurn Audit Report 
 
 ## Executive Summary
 
-A security review of the Gelt smart contract protocol was done by [0xepley](https://twitter.com/0xepley).  
+A security review of the smart contract protocol was done by [0xepley](https://twitter.com/0xepley).  
 This audit report includes all the vulnerabilities, issues and code improvements found during the security review.
 
 
 ## Test Approach and Methodology
 
-The security review was conducted using a combination of static analysis tools and comprehensive manual review of the smart contract code. The audit focused on identifying potential vulnerabilities, edge cases, and code optimization opportunities in the GELT protocol implementation.
+The security review was conducted using a combination of static analysis tools and comprehensive manual review of the smart contract code. The audit focused on identifying potential vulnerabilities, edge cases, and code optimization opportunities in the `WyvernBuyAndBurn` implementation.
 
 Key components of the methodology included:
 - Automated scanning using industry-standard static analysis tools
