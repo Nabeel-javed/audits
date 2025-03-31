@@ -1,73 +1,32 @@
-# WyvernBuyAndBurn Liquidity Creation Audit Report - Revised
 
-## Scope
 
-This audit focuses on the liquidity creation mechanism in the WyvernBuyAndBurn contract, specifically:
+# WyvernBuyAndBurn Liquidity Creation Audit Report 
 
-1. `createUniswapLiquidity` function in WyvernBuyAndBurn contract
-2. `mintInitialLiquidity` function in WyvernX contract
-3. Related internal functions: `_createTitanWyvernPool` and `_mintLP`
+## Executive Summary
 
-## Contract Interactions
+A security review of the Gelt smart contract protocol was done by [0xepley](https://twitter.com/0xepley).  
+This audit report includes all the vulnerabilities, issues and code improvements found during the security review.
 
-The liquidity creation process involves interaction between two contracts:
 
-1. **WyvernBuyAndBurn**: Controls the liquidity creation process
-2. **WyvernX**: Mints WyvernX tokens for liquidity provision
+## Test Approach and Methodology
 
-## Function Analysis
+The security review was conducted using a combination of static analysis tools and comprehensive manual review of the smart contract code. The audit focused on identifying potential vulnerabilities, edge cases, and code optimization opportunities in the GELT protocol implementation.
 
-### WyvernBuyAndBurn.createUniswapLiquidity
+Key components of the methodology included:
+- Automated scanning using industry-standard static analysis tools
+- Manual code review line-by-line with particular attention to token handling mechanisms
+- Evaluation of function validations and input sanitization
+- Analysis of gas optimization opportunities
+- Assessment of adherence to smart contract development best practices
 
-```solidity
-function createUniswapLiquidity(
-    uint256 initialWyvernXLiquidityAmount
-) external onlyOwner {
-    address wyvernAddress_ = wyvernAddress;
 
-    if (wyvernAddress_ == address(0)) revert InvalidWyvernAddress();
+## Disclaimer
 
-    WyvernX wyvernX = WyvernX(payable(wyvernAddress_));
-    IERC20 titanX = IERC20(TITANX_ADDRESS);
+"Audits are a time, resource and expertise bound effort where trained experts evaluate smart
+contracts using a combination of automated and manual techniques to find as many vulnerabilities
+as possible. Audits can show the presence of vulnerabilities **but not their absence**."
 
-    // Get current TitanX balance in the contract
-    uint256 titanContractBalanceForInitialLiquidity = titanX.balanceOf(address(this));
-    require(titanContractBalanceForInitialLiquidity > 0, "Provide TitanX Liquidity");
 
-    wyvernX.mintInitialLiquidity(initialWyvernXLiquidityAmount);
-
-    titanX.safeIncreaseAllowance(
-        UNI_NONFUNGIBLEPOSITIONMANAGER,
-        titanContractBalanceForInitialLiquidity
-    );
-
-    wyvernX.safeIncreaseAllowance(
-        UNI_NONFUNGIBLEPOSITIONMANAGER,
-        initialWyvernXLiquidityAmount
-    );
-
-    _createTitanWyvernPool(titanContractBalanceForInitialLiquidity, initialWyvernXLiquidityAmount);
-    _mintLP(titanContractBalanceForInitialLiquidity, initialWyvernXLiquidityAmount);
-}
-```
-
-### WyvernX.mintInitialLiquidity
-
-```solidity
-function mintInitialLiquidity(uint256 amount) external {
-    address buyAndBurnAddress_ = s_buyAndBurnAddress;
-
-    require(msg.sender == buyAndBurnAddress_, "must be B&B contract");
-
-    require(
-        s_manaPoolMinted == WyvernManaPoolMinted.NO,
-        "mana already minted"
-    );
-
-    _mint(buyAndBurnAddress_, amount);
-    s_manaPoolMinted = WyvernManaPoolMinted.YES;
-}
-```
 
 ## Findings
 
@@ -84,7 +43,7 @@ require(titanContractBalanceForInitialLiquidity > 0, "Provide TitanX Liquidity")
 ```
 
 **Detailed Explanation**:
-When creating a Uniswap V3 pool, the ratio between the two tokens determines the initial price. With only a check that the TitanX balance is greater than zero, there's a risk of creating a pool with severely imbalanced liquidity. For example:
+When creating a Uniswap pool, the ratio between the two tokens determines the initial price. With only a check that the TitanX balance is greater than zero, there's a risk of creating a pool with severely imbalanced liquidity. For example:
 
 - If `initialWyvernXLiquidityAmount` is 1,000,000 tokens but the TitanX balance is only 1 token, the pool would be created with an extreme price skew.
 - This imbalance could lead to:
@@ -94,15 +53,11 @@ When creating a Uniswap V3 pool, the ratio between the two tokens determines the
 
 Even with a trusted owner, having proportional validation serves as a safeguard against accidental misconfiguration.
 
-**Recommendation**: Add a proportionality check:
+**Recommendation**: Add a proportionality check
 
-```solidity
-uint256 titanContractBalanceForInitialLiquidity = titanX.balanceOf(address(this));
-require(titanContractBalanceForInitialLiquidity > 0, "Provide TitanX Liquidity");
-// Ensure reasonable ratio between tokens based on expected initial price
-require(titanContractBalanceForInitialLiquidity >= initialWyvernXLiquidityAmount * EXPECTED_PRICE_RATIO / PRECISION, 
-        "Insufficient TitanX for balanced liquidity");
-```
+**Status**: Pending
+
+
 
 #### 2. Tight Deadline Parameter in Uniswap Swaps
 
@@ -127,11 +82,6 @@ This extremely tight deadline creates several operational risks:
   
 - **Network Congestion Impact**: During periods of high network congestion, transactions may take minutes or even hours to be included in a block, making the 1-second deadline practically impossible to meet.
 
-- **MEV Vulnerability**: Miners or validators could deliberately delay including the transaction until after the deadline expires, forcing users to resubmit at potentially worse market conditions.
-
-- **Resource Waste**: Failed transactions still consume gas, leading to wasted ETH when transactions fail due to expired deadlines.
-
-This tight deadline setting does not follow industry best practices and creates unnecessary operational friction.
 
 **Recommendation**: Extend the deadline to a more reasonable timeframe:
 
@@ -140,6 +90,9 @@ deadline: block.timestamp + 15 minutes,
 ```
 
 This balances providing sufficient time for transaction inclusion while protecting against executing at extremely unfavorable prices after long delays.
+
+**Status**: Acknowledged
+
 
 ### Informational Issues
 
@@ -168,8 +121,5 @@ emit LiquidityInitialized(
 );
 ```
 
-## Conclusion
 
-The implementation correctly handles the use of pre-transferred TitanX tokens for liquidity provision. The WyvernX token minting and subsequent liquidity provisioning appear to work as intended, though adding parameter validation, extending deadline parameters, and implementing event emissions would enhance the contract's robustness and reliability.
 
-Given the owner-controlled nature of the initialization process, many of the identified issues have reduced severity. However, implementing the parameter validations and extending deadlines would provide protection against configuration errors and operational failures, even with trusted actors.
