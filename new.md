@@ -104,50 +104,42 @@ require(titanContractBalanceForInitialLiquidity >= initialWyvernXLiquidityAmount
         "Insufficient TitanX for balanced liquidity");
 ```
 
-#### 2. No Validation for WyvernX Amount
+#### 2. Tight Deadline Parameter in Uniswap Swaps
 
-**Issue**: There's no validation on the `initialWyvernXLiquidityAmount` parameter in either function, potentially allowing excessive minting.
+**Issue**: The deadline for Uniswap operations in the `buyAndBurnWyvernX` function is set to just 1 second after the current block timestamp.
 
 **Code Location**:
 ```solidity
-// In WyvernBuyAndBurn.createUniswapLiquidity
-function createUniswapLiquidity(uint256 initialWyvernXLiquidityAmount) external onlyOwner {
-    // No validation of initialWyvernXLiquidityAmount
-
-// In WyvernX.mintInitialLiquidity
-function mintInitialLiquidity(uint256 amount) external {
-    // No validation of amount
+ISwapRouter.ExactInputParams memory params = ISwapRouter
+    .ExactInputParams({
+    path: path,
+    recipient: address(this),
+    deadline: block.timestamp + 1,
+    amountIn: amountIn,
+    amountOutMinimum: amountOutMinimum
+});
 ```
 
 **Detailed Explanation**:
-The lack of validation for the WyvernX amount presents several risks:
+This extremely tight deadline creates several operational risks:
 
-1. **Tokenomics Impact**: If an extremely large amount is minted (even accidentally), it could significantly alter the token's economics and intended distribution, potentially harming the project's credibility.
+- **Transaction Failure**: Ethereum blocks are mined approximately every 12 seconds, making it highly likely that transactions will fail due to expired deadlines during normal network operation.
+  
+- **Network Congestion Impact**: During periods of high network congestion, transactions may take minutes or even hours to be included in a block, making the 1-second deadline practically impossible to meet.
 
-2. **Technical Risks**:
-   - An extremely large value could cause numeric overflow in calculations elsewhere in the system
-   - It could impact price calculations and create unintended price disparities
-   - It could result in a highly skewed pool that doesn't provide useful liquidity
+- **MEV Vulnerability**: Miners or validators could deliberately delay including the transaction until after the deadline expires, forcing users to resubmit at potentially worse market conditions.
 
-3. **Minimum Viable Amount**: Conversely, there's no check that the amount is meaningful (e.g., greater than some minimum threshold), which could lead to creating a pool with negligible liquidity.
+- **Resource Waste**: Failed transactions still consume gas, leading to wasted ETH when transactions fail due to expired deadlines.
 
-Even with trusted owners, parameter validation provides a safety net against honest mistakes or input errors.
+This tight deadline setting does not follow industry best practices and creates unnecessary operational friction.
 
-**Recommendation**: Add range validation in both functions:
+**Recommendation**: Extend the deadline to a more reasonable timeframe:
 
 ```solidity
-// In WyvernBuyAndBurn
-require(initialWyvernXLiquidityAmount >= MIN_LIQUIDITY_AMOUNT && 
-        initialWyvernXLiquidityAmount <= MAX_INITIAL_WYVERN_LIQUIDITY,
-        "Invalid WyvernX liquidity amount");
-
-// In WyvernX
-require(amount >= MIN_LIQUIDITY_AMOUNT && 
-        amount <= MAX_MINT_AMOUNT, 
-        "Invalid mint amount");
+deadline: block.timestamp + 15 minutes,
 ```
 
-
+This balances providing sufficient time for transaction inclusion while protecting against executing at extremely unfavorable prices after long delays.
 
 ### Informational Issues
 
@@ -178,6 +170,6 @@ emit LiquidityInitialized(
 
 ## Conclusion
 
-The implementation correctly handles the use of pre-transferred TitanX tokens for liquidity provision. The WyvernX token minting and subsequent liquidity provisioning appear to work as intended, though adding parameter validation and event emissions would enhance the contract's robustness.
+The implementation correctly handles the use of pre-transferred TitanX tokens for liquidity provision. The WyvernX token minting and subsequent liquidity provisioning appear to work as intended, though adding parameter validation, extending deadline parameters, and implementing event emissions would enhance the contract's robustness and reliability.
 
-Given the owner-controlled nature of the initialization process, many of the identified issues have reduced severity. However, implementing the parameter validations would provide protection against configuration errors, even with trusted actors.
+Given the owner-controlled nature of the initialization process, many of the identified issues have reduced severity. However, implementing the parameter validations and extending deadlines would provide protection against configuration errors and operational failures, even with trusted actors.
