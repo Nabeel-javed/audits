@@ -55,7 +55,7 @@ Even with a trusted owner, having proportional validation serves as a safeguard 
 
 **Recommendation**: Add a proportionality check
 
-**Status**: Pending
+**Status**: Acknowledged
 
 
 
@@ -121,5 +121,6 @@ emit LiquidityInitialized(
 );
 ```
 
+**Status**: Acknowledged
 
 
