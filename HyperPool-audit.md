@@ -176,6 +176,10 @@ ISwapRouter.ExactInputSingleParams memory params = ISwapRouter.ExactInputSingleP
 
 **Recommendation**: Implement proper slippage protection with configurable limits 
 
+
+**Resolution**
+Acknowledged
+
 ### 2. **Critical Accounting Error in initialDeposits Tracking**
 **Location**: AggregatorManager.sol:248
 **Risk**: CRITICAL
@@ -268,6 +272,8 @@ initialDeposits[user] -= usdcTotal;  // 1300 - 1450 = -150 (UNDERFLOW!)
 
 **Recommendation**: Line 248 should be `initialDeposits[user] -= info.initialDeposit;` to maintain correct accounting.
 
+**Resolution**
+Invalid, function is only called once per user session 
 
 ## High Risk Issues
 
@@ -289,8 +295,10 @@ Some DeFi users are Multisigs or Account Abstraction wallets.
 In such cases, tx.origin is not correct final user identification.
 
 
-
 **Recommendation**: Remove this modifier or implement proper bot detection mechanisms that don't break composability.
+
+**Resolution**
+Acknowledged
 
 ### 2. **Lack of Emergency Mechanisms**
 **Location**: Global
@@ -303,6 +311,10 @@ In such cases, tx.origin is not correct final user identification.
 - No emergency withdrawal mechanism for admin
 
 **Recommendation**: Implement emergency pause functionality and recovery mechanisms.
+
+
+**Resolution**
+Acknowledged, Will be added in future
 
 ---                                                       
 
@@ -323,6 +335,9 @@ univ3NFTManager = _univ3NFTManager;  // No zero address check
 
 **Recommendation**: Add zero address validation for all critical address parameters.
 
+**Resolution**
+Acknowledged, Will be added in future
+
 ### 2. **Remove Function Parameter causing confusion**
 **Location**: AggregatorManager.sol:187
 **Risk**: LOW
@@ -335,7 +350,8 @@ function withdrawTotal(address user) external isHuman {
 
 **Recommendation**: Remove the input parameter as it is causing confusion simply pass msg.sender to next function
 
-
+**Resolution**
+Solved
 
 ## Informational Issues
 
@@ -352,6 +368,9 @@ pragma solidity ^0.8.20;  // OwnableUpgradeable.sol
 **Note**: While this doesn't present a security risk, it's good practice to standardize versions across the project.
 
 **Recommendation**: Standardize on a single, latest stable version across all contracts for consistency.
+
+**Resolution**
+Solved
 
 ---
 
