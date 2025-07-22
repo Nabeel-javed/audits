@@ -1,14 +1,36 @@
-# GMCoin Business Logic Vulnerabilities - Deep Analysis
+# GMCoin Smart Contracts Security Audit Report
 
-**Audit Date:** July 22, 2025  
- 
 
-**Executive Summary:**
-Deep analysis of business logic revealed 5 critical vulnerabilities that can completely break the economic model, allow unlimited token generation, and cause system failures. These represent fundamental flaws in the core business logic that must be fixed immediately.
+## Disclaimer: This audit represents a point-in-time assessment. Smart contracts require ongoing security monitoring and regular audits. No audit can point out 100% of the vulnerabilities so its best to go for multiple audits to increase your chances.
+
+
+### Key Findings Summary:
+- **2 Critical Vulnerabilities**
+- **2 High Risk Issues**  
+- **2 Low Risk Issues**
+- **1 Informational Issue**
 
 ---
 
-## 🔴 CRITICAL SEVERITY VULNERABILITIES (2)
+## Scope
+
+### Audited Contracts:
+- **GMCoin.sol** 
+- **Storage.sol** 
+- **TwitterOracle.sol**
+
+### Audit Methodology:
+- Static code analysis
+- Manual security review
+- Architecture assessment
+- Business logic validation
+- Access control verification
+- Edge case analysis
+
+---
+
+
+## CRITICAL SEVERITY VULNERABILITIES (21)
 
 ### CRITICAL-001: Double Registration Exploit - Unlimited Token Generation
 **Location:** TwitterOracle.sol:137-153  
@@ -42,37 +64,18 @@ The function checks if `walletsByUserIDs[userID] == address(0)` but the `removeM
 **Attack Scenario:**
 ```solidity
 // Infinite money glitch:
-// 1. User gets verified -> receives coins
+// 1. User gets verified -> receives coins for tweet
 // 2. User calls removeMe() -> walletsByUserIDs[userID] becomes address(0)  
 // 3. User gets verified again -> condition passes, mints welcome coins AGAIN
 // 4. Repeat infinitely -> unlimited tokens!
 
 // Example exploitation:
-// - Welcome coins = 1000 * COINS_MULTIPLICATOR  
+// - Coins = 1000 * COINS_MULTIPLICATOR  
 // - After 100 iterations = 100,000 * COINS_MULTIPLICATOR tokens
 // - Cost: Just gas fees for removeMe() calls
 // - Time: Minutes to become majority token holder
 ```
 
-**Economic Impact:**
-- **Complete token devaluation**: Infinite supply destroys all value
-- **Market manipulation**: Attackers become instant majority holders  
-- **System collapse**: All legitimate rewards become worthless
-- **Business failure**: Economic incentives completely broken
-
-**Proof of Concept:**
-```javascript
-// Attack contract:
-contract ExploitContract {
-    function infiniteTokens() external {
-        for(uint i = 0; i < 1000; i++) {
-            // 1. Get verified by Gelato -> mint welcome coins
-            // 2. Call removeMe() -> clear userID mapping
-            // 3. Repeat -> profit!
-        }
-    }
-}
-```
 
 **Remediation:**
 ```solidity
@@ -103,10 +106,9 @@ function verifyTwitter(string calldata userID, address wallet) public onlyGelato
 
 ---
 
-### HIGH-003: Missing User Index Cleanup in `removeMe()`
+### CRITICAL-002:  Missing User Index Cleanup in `removeMe()`
 **Location:** TwitterOracle.sol:369  
-**Severity:** HIGH  
-**Business Impact:** DATA INTEGRITY ISSUES
+**Severity:** Critical  
 
 **Vulnerable Code:**
 ```solidity
@@ -132,10 +134,6 @@ function removeMe() public {
 **The Flaw:**
 The `userIndexByUserID[userID]` mapping is never cleaned up, leaving stale references that point to wrong array positions after user removal.
 
-**Impact:**
-- **Data corruption**: Stale mappings pointing to wrong users
-- **Storage bloat**: Unnecessary storage usage over time  
-- **System confusion**: Inconsistent state between mappings and arrays
 
 **Remediation:**
 ```solidity
@@ -164,10 +162,6 @@ if (userData[i].userIndex > mintingData.allTwitterUsers.length) {
 **Description:**
 Should use `>=` instead of `>` since array indexes are zero-based. Valid indexes are `0` to `length-1`, so `length` itself is invalid.
 
-**Impact:**
-- Allows access to non-existent array index equal to array length
-- Will cause array out-of-bounds access and transaction revert
-- DoS potential for minting operations
 
 **Proof of Concept:**
 ```solidity
