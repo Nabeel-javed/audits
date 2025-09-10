@@ -5,6 +5,28 @@ This audit represents a point-in-time assessment. Smart contracts require ongoin
 
 ---
 
+## Table of Contents
+
+1. [Executive Summary](#executive-summary)
+2. [Critical Issues](#critical-issues)
+   - [1. Staking Lock Duration Reset Attack](#1-critical-staking-lock-duration-reset-attack)
+3. [Medium Issues](#medium-issues)
+   - [2. Missing Slippage Protection for BATA Price Changes](#2-medium-missing-slippage-protection-for-bata-price-changes)
+   - [3. Unbounded Loop DoS](#3-medium-unbounded-loop-dos)
+4. [Admin-Related Issues](#admin-related-issues)
+   - [4. RescueToken Can Drain User Funds](#4-admin-rescuetoken-can-drain-user-funds)
+   - [5. Merkle Root Updates After Claims](#5-admin-merkle-root-updates-after-claims)
+   - [6. TGE Timestamp Changes](#6-admin-tge-timestamp-changes)
+5. [Low Issues](#low-issues)
+   - [7. Use Ownable2Step instead of Ownable](#7-low-use-ownable2step-instead-of-ownable)
+6. [Gas Optimization Issues](#gas-optimization-issues)
+   - [8. Nesting if-statements is cheaper than using &&](#8-gas-saving-nesting-if-statements-is-cheaper-than-using-)
+   - [9. Cache array length outside of loop](#9-gas-saving-cache-array-length-outside-of-loop)
+   - [10. Use Custom Errors](#10-gas-saving-use-custom-errors)
+   - [11. Using `private` rather than `public` for constants, saves gas](#11-gas-saving-using-private-rather-than-public-for-constants-saves-gas)
+
+---
+
 ## Executive Summary
 
 ### Total Issues Found: 7
@@ -16,6 +38,7 @@ This audit represents a point-in-time assessment. Smart contracts require ongoin
 
 ---
 
+## Critical Issues
 
 ### 1. [CRITICAL] Staking Lock Duration Reset Attack
 
@@ -74,6 +97,8 @@ mapping(address => Stake[]) public stakes;
 ```
 
 ---
+
+## Medium Issues
 
 ### 2. [MEDIUM] Missing Slippage Protection for BATA Price Changes
 
@@ -150,7 +175,7 @@ require(addrs.length <= 100, "Too many addresses");
 
 ---
 
-## ADMIN-RELATED ISSUES
+## Admin-Related Issues
 
 
 ### 4. [ADMIN] RescueToken Can Drain User Funds
@@ -247,6 +272,7 @@ Admin can change TGE timestamp via `setTgeTimestamp()`:
 
 ---
 
+## Low Issues
 
 ### 7. [Low] Use Ownable2Step instead of Ownable
 
@@ -264,6 +290,7 @@ contract BATAStageSale is Ownable, ReentrancyGuard {
 
 
 
+## Gas Optimization Issues
 
 ### 8. [Gas Saving] Nesting if-statements is cheaper than using &&
 
