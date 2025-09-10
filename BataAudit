@@ -8,9 +8,9 @@ This audit represents a point-in-time assessment. Smart contracts require ongoin
 ## Executive Summary
 
 ### Total Issues Found: 7
-- 1 CRITICAL severity issue (user-exploitable)
-- 2 MEDIUM severity issues (user-exploitable)
-- 4 ADMIN-RELATED issues (trust assumptions)
+- 1 CRITICAL severity issue 
+- 2 MEDIUM severity issues 
+- 4 ADMIN-RELATED issues 
 
 ---
 
@@ -56,7 +56,6 @@ staking.stake(1);
 staking.unstake(); // REVERTS: "lock not expired"
 // Must wait until Day 119 (59 + 60)
 ```
-
 
 #### Impact
 - Users lose accumulated lock time
