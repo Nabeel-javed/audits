@@ -245,3 +245,72 @@ Admin can change TGE timestamp via `setTgeTimestamp()`:
 
 ---
 
+
+###  [Low] Use Ownable2Step instead of Ownable
+
+**Contract**: `BATAStageSale.sol`  
+**Severity**: low  
+
+#### Description:
+The `Ownable2Step` pattern involves a two-step process where the current owner proposes a new owner, and the new owner must accept the proposal to complete the transfer. This mechanism requires active participation from both parties, significantly reducing the risk of unintended or unauthorized ownership changes.
+
+#### Recommendation:
+use `Ownable2Step` instead of `Ownable`
+```solidity
+contract BATAStageSale is Ownable, ReentrancyGuard {
+```
+
+
+
+
+### [Gas Saving] Nesting if-statements is cheaper than using &&
+
+**Contract**: `BATAStageSale.sol`  
+**Severity**: Gas  
+
+#### Description:
+Nesting if-statements avoids the stack operations of setting up and using an extra jumpdest, and saves 6 [gas](https://gist.github.com/IllIllI000/7f3b818abecfadbef93b894481ae7d19)  
+
+There are total 5 instances of this issue
+
+
+
+
+### [Gas Saving] Cache array length outside of loop
+**Contract**: `BATAStageSale.sol`  
+**Severity**: Gas  
+
+#### Description:
+If not cached, the solidity compiler will always read the length of the array during each iteration. That is, if it is a storage array, this is an extra sload operation (100 additional extra gas for each iteration except for the first) and if it is a memory array, this is an extra mload operation (3 additional gas for each iteration except for the first).
+
+There are total 2 instances of this issue
+
+
+
+### [Gas Saving] Use Custom Errors
+
+**Contract**: `Whole Codebase`  
+**Severity**: Gas  
+
+#### Description:
+[Source](https://blog.soliditylang.org/2021/04/21/custom-errors/)
+Instead of using error strings, to reduce deployment and runtime cost, you should use Custom Errors. This would save both deployment and runtime cost.
+
+There are total 62 instances of this issue
+
+
+
+
+### [Gas Saving] Using `private` rather than `public` for constants, saves gas
+
+**Contract**: `BATA.sol, BATAStaking.sol `  
+**Severity**: Gas  
+
+
+#### Description:
+If needed, the values can be read from the verified contract source code, or if there are multiple values there can be a single getter function that [returns a tuple](https://github.com/code-423n4/2022-08-frax/blob/90f55a9ce4e25bceed3a74290b854341d8de6afa/src/contracts/FraxlendPair.sol#L156-L178) of the values of all currently-public constants. Saves **3406-3606 gas** in deployment gas due to the compiler not having to create non-payable getter functions for deployment calldata, not having to store the bytes of the value outside of where it's used, and not adding another entry to the method ID table
+
+There are total 10 instances of this issue
+
+#### Resolution:
+Acknowledge
