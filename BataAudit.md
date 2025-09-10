@@ -341,5 +341,4 @@ If needed, the values can be read from the verified contract source code, or if 
 
 There are total 10 instances of this issue
 
-#### Resolution:
-Acknowledge
+
