@@ -10,7 +10,9 @@ This audit represents a point-in-time assessment. Smart contracts require ongoin
 ### Total Issues Found: 7
 - 1 CRITICAL severity issue 
 - 2 MEDIUM severity issues 
-- 3 ADMIN-RELATED issues  
+- 3 ADMIN-RELATED issues
+- 1 LOW severity issue
+- 4 GAS Related issues
 
 ---
 
@@ -211,7 +213,7 @@ function updateMerkleRoot(bytes32 root) external onlyOwner {
 
 ---
 
-### 7. [ADMIN] TGE Timestamp Changes
+### 6. [ADMIN] TGE Timestamp Changes
 
 **Contract**: `BATAStageSale.sol`  
 **Severity**: Medium (if admin is malicious)  
@@ -246,7 +248,7 @@ Admin can change TGE timestamp via `setTgeTimestamp()`:
 ---
 
 
-###  [Low] Use Ownable2Step instead of Ownable
+### 7. [Low] Use Ownable2Step instead of Ownable
 
 **Contract**: `BATAStageSale.sol`  
 **Severity**: low  
@@ -263,7 +265,7 @@ contract BATAStageSale is Ownable, ReentrancyGuard {
 
 
 
-### [Gas Saving] Nesting if-statements is cheaper than using &&
+### 8. [Gas Saving] Nesting if-statements is cheaper than using &&
 
 **Contract**: `BATAStageSale.sol`  
 **Severity**: Gas  
@@ -276,7 +278,7 @@ There are total 5 instances of this issue
 
 
 
-### [Gas Saving] Cache array length outside of loop
+### 9. [Gas Saving] Cache array length outside of loop
 **Contract**: `BATAStageSale.sol`  
 **Severity**: Gas  
 
@@ -287,7 +289,7 @@ There are total 2 instances of this issue
 
 
 
-### [Gas Saving] Use Custom Errors
+### 10. [Gas Saving] Use Custom Errors
 
 **Contract**: `Whole Codebase`  
 **Severity**: Gas  
@@ -301,7 +303,7 @@ There are total 62 instances of this issue
 
 
 
-### [Gas Saving] Using `private` rather than `public` for constants, saves gas
+### 11. [Gas Saving] Using `private` rather than `public` for constants, saves gas
 
 **Contract**: `BATA.sol, BATAStaking.sol `  
 **Severity**: Gas  
