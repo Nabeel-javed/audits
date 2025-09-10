@@ -10,7 +10,7 @@ This audit represents a point-in-time assessment. Smart contracts require ongoin
 ### Total Issues Found: 7
 - 1 CRITICAL severity issue 
 - 2 MEDIUM severity issues 
-- 4 ADMIN-RELATED issues  
+- 3 ADMIN-RELATED issues  
 
 ---
 
