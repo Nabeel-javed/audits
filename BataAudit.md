@@ -6,6 +6,35 @@ This audit represents a point-in-time assessment. Smart contracts require ongoin
 
 ---
 
+## Table of Contents
+
+1. [🔒 POST-AUDIT UPDATE: ALL ISSUES FIXED](#-post-audit-update-all-issues-fixed)
+   - [Fix Verification Summary](#fix-verification-summary)
+   - [Security Analysis: No New Issues Introduced](#security-analysis-no-new-issues-introduced)
+2. [Methodology](#methodology)
+   - [Phase 1: Automated Static Analysis](#phase-1-automated-static-analysis)
+   - [Phase 2: Invariant Testing](#phase-2-invariant-testing)
+   - [Phase 3: Manual Code Review](#phase-3-manual-code-review)
+3. [Executive Summary](#executive-summary)
+4. [Critical Issues](#critical-issues)
+   - [1. Staking Lock Duration Reset Attack](#1-critical-staking-lock-duration-reset-attack)
+5. [Medium Issues](#medium-issues)
+   - [2. Missing Slippage Protection for BATA Price Changes](#2-medium-missing-slippage-protection-for-bata-price-changes)
+   - [3. Unbounded Loop DoS](#3-medium-unbounded-loop-dos)
+6. [Admin-Related Issues](#admin-related-issues)
+   - [4. RescueToken Can Drain User Funds](#4-admin-rescuetoken-can-drain-user-funds)
+   - [5. Merkle Root Updates After Claims](#5-admin-merkle-root-updates-after-claims)
+   - [6. TGE Timestamp Changes](#6-admin-tge-timestamp-changes)
+7. [Low Issues](#low-issues)
+   - [7. Use Ownable2Step instead of Ownable](#7-low-use-ownable2step-instead-of-ownable)
+8. [Gas Optimization Issues](#gas-optimization-issues)
+   - [8. Nesting if-statements is cheaper than using &&](#8-gas-saving-nesting-if-statements-is-cheaper-than-using-)
+   - [9. Cache array length outside of loop](#9-gas-saving-cache-array-length-outside-of-loop)
+   - [10. Use Custom Errors](#10-gas-saving-use-custom-errors)
+   - [11. Using `private` rather than `public` for constants, saves gas](#11-gas-saving-using-private-rather-than-public-for-constants-saves-gas)
+
+---
+
 ## 🔒 POST-AUDIT UPDATE: ALL ISSUES FIXED
 
 **Last Updated**: 14 September 2025
@@ -36,29 +65,6 @@ The fixes have been carefully reviewed to ensure they don't introduce new vulner
 5. **Immutable Epochs**: Clean design with no complexity debt
 6. **TGE Guards**: Multiple independent checks that don't conflict
 7. **Ownable2Step**: Battle-tested OpenZeppelin implementation
-
----
-
-## Table of Contents
-
-1. [Methodology](#methodology)
-2. [Executive Summary](#executive-summary)
-3. [Critical Issues](#critical-issues)
-   - [1. Staking Lock Duration Reset Attack](#1-critical-staking-lock-duration-reset-attack)
-4. [Medium Issues](#medium-issues)
-   - [2. Missing Slippage Protection for BATA Price Changes](#2-medium-missing-slippage-protection-for-bata-price-changes)
-   - [3. Unbounded Loop DoS](#3-medium-unbounded-loop-dos)
-5. [Admin-Related Issues](#admin-related-issues)
-   - [4. RescueToken Can Drain User Funds](#4-admin-rescuetoken-can-drain-user-funds)
-   - [5. Merkle Root Updates After Claims](#5-admin-merkle-root-updates-after-claims)
-   - [6. TGE Timestamp Changes](#6-admin-tge-timestamp-changes)
-6. [Low Issues](#low-issues)
-   - [7. Use Ownable2Step instead of Ownable](#7-low-use-ownable2step-instead-of-ownable)
-7. [Gas Optimization Issues](#gas-optimization-issues)
-   - [8. Nesting if-statements is cheaper than using &&](#8-gas-saving-nesting-if-statements-is-cheaper-than-using-)
-   - [9. Cache array length outside of loop](#9-gas-saving-cache-array-length-outside-of-loop)
-   - [10. Use Custom Errors](#10-gas-saving-use-custom-errors)
-   - [11. Using `private` rather than `public` for constants, saves gas](#11-gas-saving-using-private-rather-than-public-for-constants-saves-gas)
 
 ---
 
