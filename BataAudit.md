@@ -424,14 +424,6 @@ contract BATAStageSale is Ownable, ReentrancyGuard {
 Upgraded to `Ownable2Step`:
 
 
-## Gas Optimization Issues ✅ **ADDRESSED**
-
-All gas optimization recommendations have been implemented:
-- **Custom Errors**: Contracts now use custom errors instead of require strings
-- **Private Constants**: Constants marked as `private` for deployment gas savings  
-- **Loop Optimizations**: Using `++i` increment pattern
-- **Efficient Storage Packing**: Structs optimized with proper type ordering
-
 ### 8. [Gas Saving] Nesting if-statements is cheaper than using &&
 
 **Contract**: `BATAStageSale.sol`  
