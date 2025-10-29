@@ -1,21 +1,14 @@
-# DeadToken Audit — Critical/High/Medium Findings Only
+# DeadToken Audit
 
 Audit date: 2025-10-29
 
 ## Scope and Context
 
-- In-scope file: `Dead (1).sol` (contract `DeadToken`, Solidity 0.8.28)
+- In-scope file: `Dead.sol` (contract `DeadToken`, Solidity 0.8.28)
 - Chain: Base (EVM, L2)
-- Key dependencies: OpenZeppelin (v5.4.x), LayerZero OFT/OApp v2
-- Focus: Business-logic issues leading to loss of funds, abuse, manipulation, or DoS. Excluded: overflow/underflow (>=0.8), generic reentrancy notes, and “admin can drain funds”.
+- Key dependencies: OpenZeppelin, LayerZero OFT/OApp v2
 
-## Assumptions
 
-- “Idle-claim” is intended to allow taking tokens from addresses idle for `IDLE_PERIOD` unless explicitly whitelisted (pools).
-- Platform and vesting allocations are meant to be protected from unintended drain (if not, callouts below still stand as high‑impact economic risks).
-- Cross-chain mint requests are made by whitelisted “switchbox” contracts; end users are not expected to cover any fee beyond the LayerZero native fee.
-
----
 
 ## Findings
 
