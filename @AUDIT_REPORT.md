@@ -14,7 +14,7 @@ Audit date: 2025-10-29
 
 ### 1) Immediate drain of platform/vesting/initial-mint allocations via idle-claim due to missing lastTransferTime updates on mint
 
-**Location:** `claimIdleTokens(...)`, `_update(...)`, `_mintByTierHub(...)`, `mintInitial(...)`
+**Location:** `claimIdleTokens(...)`
 
 ### Details
 
@@ -32,12 +32,9 @@ if (block.timestamp < lastTransferTime[target] + IDLE_PERIOD) {
 }
 ```
 
-### Root Cause: Missing Timer Initialization on Mints
-
-When new tokens are **minted** (created from nothing), the contract calls `_mint()`, which internally triggers `_update(address(0), recipient, amount)`. The `_update` hook is:
+### Root Cause:
 
 ```solidity
-// Lines 632-642
 function _update(address from, address to, uint256 value) internal override {
     super._update(from, to, value);
 
@@ -52,10 +49,6 @@ function _update(address from, address to, uint256 value) internal override {
 
 - Minted tokens receive no timer initialization
 - Recipients' `lastTransferTime[recipient]` remains at the default value: `0`
-
-## Mathematical Vulnerability: Immediate Claimability
-
-### The Timestamp Math Problem
 
 **Current timestamp on Base (2025-10-29):**
 
@@ -84,43 +77,6 @@ FALSE ✓ Check PASSES immediately
 **This means:** Any address minted tokens with `lastTransferTime = 0` is **immediately claimable** on day 1, regardless of IDLE_PERIOD.
 
 ---
-
-## Exploitation Mechanics
-
-### Step-by-Step Attack
-
-**Setup (Requires 1M DEAD tokens, easily obtainable):**
-
-1. Attacker acquires ≥ `MIN_CLAIMER_BALANCE = 1,000,000` DEAD tokens
-2. Owner mints tokens to a system address (treasury, vesting, or platform)
-   - Example: `mintInitial(treasuryAddr)` with 200M tokens
-   - `treasuryAddr.lastTransferTime = 0` (NOT SET)
-
-**Attack (Single transaction):** 3. Attacker calls `claimIdleTokens(treasuryAddr)` 4. Contract checks:
-
-- ✓ `balanceOf(attacker) >= 1M` (has MIN_CLAIMER_BALANCE)
-- ✓ `block.timestamp >= 0 + IDLE_PERIOD` (always true today)
-- ✓ `treasuryAddr` not whitelisted (system addresses not on whitelist)
-- ✓ `treasuryAddr != address(0)`
-- ✓ `balanceOf(treasuryAddr) > 0` (200M tokens)
-
-5. All checks pass → Execute distribution:
-
-```solidity
-uint256 claimerAmount = (200M * 50) / 100 = 100M;        // To attacker
-uint256 burnAmount = (200M * 40) / 100 = 80M;             // Burned
-uint256 platformAmount = 200M - 100M - 80M = 20M;         // To platforms
-  - platform1Amount = (20M * 50) / 100 = 10M;
-  - platform2Amount = (20M * 30) / 100 = 6M;
-  - platform3Amount = 20M - 10M - 6M = 4M;
-```
-
-**Result:**
-
-- `treasuryAddr.balanceOf() = 0` (completely drained)
-- `attacker.balanceOf() += 100M` (profit)
-- `burnAddress.balanceOf() += 80M` (tokens destroyed)
-- Platforms receive 20M instead of 0 (actually benefits them)
 
 
 ## Proof-of-Concept Code (Foundry Test)
@@ -156,7 +112,6 @@ function testImmediateDrainVestingTokens() public {
 ```
 
 
-
 ## Recommended Fixes
 
 ### **Option A: Set Timer in `_update()` Hook**
@@ -185,7 +140,6 @@ function _update(
 
 **Location:** `requestTierMint(...)` (lines 278-305)
 
----
 
 ## Vulnerability Explanation
 
@@ -227,9 +181,7 @@ In this context:
 - The end user has **no way to recover the excess**
 
 
-### Mathematical Example
-**Assume:**
-
+### Example
 - LayerZero fee quote: `fee.nativeFee = 0.0523 ETH` (typical fee)
 - User sends through switchbox: `msg.value = 0.0600 ETH` (0.0077 ETH over)
 
@@ -250,17 +202,9 @@ Step 3: Refund handling
   ✗ User never receives the 0.0077 ETH
 ```
 
-**Result:**
-
-- Switchbox contract balance increases by 0.0077 ETH
-- User permanently loses 0.0077 ETH
-
----
 
 
 ## Recommended Fixes
-
-### **Refund Excess to End User (Better for Users)**
 
 ```solidity
 MessagingFee memory fee = _quote(hubEid, payload, options, false);
@@ -279,49 +223,6 @@ if (overpayment > 0) {
 }
 ```
 
-**Advantages:**
-
-- ✓ User gets refund immediately
-- ✓ No UX friction
-- ✓ Handles fee fluctuations gracefully
-
-**Disadvantages:**
-
-- ✗ Slightly more complex
-- ✗ Calls external address (need reentrancy guard, but contract already has `nonReentrant`)
-
----
-
-### **Option C: Hybrid Approach (Recommended)**
-
-Combine both strategies:
-
-```solidity
-MessagingFee memory fee = _quote(hubEid, payload, options, false);
-
-// Allow 0.1% overpayment tolerance for slippage
-uint256 maxAcceptable = fee.nativeFee * 1001 / 1000;  // 100.1%
-
-if (msg.value < fee.nativeFee) {
-    revert InvalidMessageValue(fee.nativeFee, msg.value);
-}
-require(msg.value <= maxAcceptable, "Overpayment exceeds tolerance");
-
-_lzSend(hubEid, payload, options, fee, address(this));
-
-// Refund any excess
-uint256 overpayment = msg.value - fee.nativeFee;
-if (overpayment > 0) {
-    (bool success, ) = user.call{value: overpayment}("");
-    require(success, "Refund failed");
-}
-```
-
-**Advantages:**
-
-- ✓ Catches accidental massively-wrong amounts (e.g., 10x fee)
-- ✓ Allows small slippage for normal conditions
-- ✓ Refunds legitimate excess
 
 
 ### 3) Medium — Idle-claim timer can be indefinitely refreshed via zero-value transfers
@@ -340,7 +241,7 @@ The contract implements an inactivity penalty via the `lastTransferTime` mapping
 - After `IDLE_PERIOD` (90 days) without transfers, anyone can claim and redistribute that account's tokens
 - This creates an incentive for token holders to remain active (transfer tokens periodically)
 
-**Current timer update logic (lines 632-642):**
+**Current timer update logic:**
 
 ```solidity
 function _update(
@@ -403,91 +304,6 @@ token.transfer(randomAddr, 0);
 
 ---
 
-## Mathematical Proof of Bypass
-
-### Timeline Analysis
-
-Let:
-
-- $t_0$ = Initial transfer time
-- $T = IDLE\_PERIOD = 90$ days
-- $r$ = Refresh interval (every 80-89 days)
-
-**Without exploit:**
-
-- Claimable at: $t_0 + T = t_0 + 90d$
-- Account would be drained on day 91
-
-**With zero-value exploit:**
-
-- Day $t_0$: `lastTransferTime[attacker] = t_0`
-- Day $t_0 + 85d$: Attacker calls `transfer(addr, 0)` → `lastTransferTime[attacker] = t_0 + 85d`
-- Day $t_0 + 170d$: Attacker calls `transfer(addr, 0)` → `lastTransferTime[attacker] = t_0 + 170d`
-- Day $t_0 + N \cdot 85d$: Attacker calls `transfer(addr, 0)` → `lastTransferTime[attacker] = t_0 + N \cdot 85d$
-
-**Claim condition check at each day:**
-
-```
-Claimable if: now >= lastTransferTime[attacker] + 90d
-
-Day 88d:   88d >= 0d + 90d → FALSE
-Day 91d:   91d >= 0d + 90d → TRUE ✓ (Would be drained)
-BUT
-Day 91d (with exploit): 91d >= 85d + 90d → FALSE ✓ (Protected!)
-```
-
-**By refreshing every 85 days, the attacker ensures:**
-
-```
-now < lastTransferTime[attacker] + 90d  (always)
-```
-
-The attack works **indefinitely** with minimal gas cost.
-
----
-
-## Real-World Scenario
-
-### Timeline: Alice vs. Bob
-
-**Setup:**
-
-- Alice: Legitimate token holder, intends to hold tokens
-- Bob: Attacker who wants to avoid idle-claim
-- `IDLE_PERIOD = 90 days`
-- `MIN_CLAIMER_BALANCE = 1M tokens`
-
-| Day  | Alice                                                                 | Bob                                                            |
-| ---- | --------------------------------------------------------------------- | -------------------------------------------------------------- |
-| 0    | Receives 1B tokens, `lastTransferTime[Alice] = 0`                     | Receives 1B tokens, `lastTransferTime[Bob] = 0`                |
-| 45   | Does nothing (holding tokens)                                         | Calls `transfer(randomAddr, 0)`, `lastTransferTime[Bob] = 45`  |
-| 89   | Alice's timer approaching expiration (timer = 0, so always claimable) | Bob's timer still recent (timer = 45)                          |
-| 90   | **Vulnerable:** Attacker can drain Alice                              | Bob is protected                                               |
-| 135  | N/A (already drained)                                                 | Calls `transfer(randomAddr, 0)`, `lastTransferTime[Bob] = 135` |
-| 180+ | N/A                                                                   | Continues calling `transfer` every 85d indefinitely            |
-
-**Result:**
-
-- Alice loses 100% of tokens (can't block with transfers)
-- Bob keeps 100% of tokens (can block with free transfers)
-- **Intended mechanism (inactivity penalty) is defeated**
-
----
-
-## Impact Assessment
-
-| Aspect               | Assessment                                             |
-| -------------------- | ------------------------------------------------------ |
-| **Severity**         | Medium — DoS of intended economic mechanic             |
-| **Exploitability**   | Trivial — Requires one call every 90 days              |
-| **Cost to attacker** | ~50,000 gas (~$1-3 at normal rates) every 90 days      |
-| **Attack surface**   | Public `transfer()`, `transferFrom()`                  |
-| **Permissionless**   | Yes — Any token holder can exploit                     |
-| **Direct theft**     | No — Doesn't steal tokens, only prevents claim         |
-| **Economic impact**  | High — Breaks intended token sink; distorts incentives |
-
----
-
 ## Proof-of-Concept (Foundry Test)
 
 ```solidity
@@ -519,28 +335,7 @@ function testZeroValueTransferBypassesClaim() public {
 }
 ```
 
----
-
-## Why This Is a Problem
-
-The idle-claim mechanism serves an important economic purpose:
-
-1. **Token sink** — Removes inactive tokens from circulation
-2. **Redistribution** — Reallocates tokens to active participants
-3. **Incentive** — Encourages participation and engagement
-
-**By allowing zero-value transfers to reset the timer, users can:**
-
-- Hold tokens passively without penalty
-- Bypass the entire inactivity mechanism
-- Hoard tokens while contributing nothing
-- Undermine the intended economic design
-
----
-
 ## Recommended Fixes
-
-### **Option A: Only Update Timer for Non-Zero Transfers (Simplest)**
 
 ```solidity
 function _update(
@@ -557,91 +352,5 @@ function _update(
 }
 ```
 
-**Advantages:**
 
-- ✓ Minimal code change (one line)
-- ✓ Solves the problem completely
-- ✓ Zero side effects
-- ✓ Prevents spam transfers
-
----
-
-### **Option B: Revert on Zero-Value Transfers (Stricter)**
-
-```solidity
-function _update(
-    address from,
-    address to,
-    uint256 value
-) internal override {
-    require(value > 0, "Zero-value transfers not allowed");  // ADD
-    super._update(from, to, value);
-
-    if (from != address(0)) {
-        lastTransferTime[from] = block.timestamp;
-    }
-}
-```
-
-**Advantages:**
-
-- ✓ Completely prevents zero-value transfers
-- ✓ More explicit about intent
-
-**Disadvantages:**
-
-- ✗ Breaks compatibility with standard ERC20 behavior
-- ✗ May cause issues with tools that send 0-value transfers for checks
-- ✗ Stricter than necessary
-
----
-
-### **Option C: Require Minimum Transfer (Alternative)**
-
-```solidity
-function _update(
-    address from,
-    address to,
-    uint256 value
-) internal override {
-    super._update(from, to, value);
-
-    // Only reset timer for meaningful transfers
-    uint256 minTransfer = 1;  // At least 1 wei
-    if (from != address(0) && value >= minTransfer) {
-        lastTransferTime[from] = block.timestamp;
-    }
-}
-```
-
-**Advantages:**
-
-- ✓ Allows tiny transfers but prevents zero-value
-- ✓ Raises minimum cost of attack slightly
-
-**Disadvantages:**
-
-- ✗ Attacker can still refresh with 1 wei
-- ✗ Doesn't solve the problem, just increases cost
-
----
-
-## Recommended Implementation
-
-**Use Option A** (only update for `value > 0`):
-
-- Single line addition
-- No breaking changes
-- Solves the problem completely
-- Aligns with ERC20 semantics (transfers should involve positive value)
-
----
-
-## Notes (Non-findings / Clarifications)
-
-- The pool whitelist timelock (60 minutes) creates a window where newly scheduled pools remain vulnerable to idle-claim until activation. Operationally, pre-schedule pool addresses before holding balances, or exempt them at deployment. Not classified as a finding given the mechanism appears intentional.
-
-## Conclusion
-
-The most urgent fix is to protect minted recipients (vesting/platform/initial receiver) from immediate idle-claim by setting their `lastTransferTime` at mint (and/or excluding them). Address the LayerZero fee overpayment to prevent trapped ETH, and harden the idle-claim mechanic against zero-value heartbeat transfers.
 
