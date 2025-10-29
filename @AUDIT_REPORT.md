@@ -64,58 +64,6 @@ function _update(address from, address to, uint256 value) internal override {
 - Minted tokens receive no timer initialization
 - Recipients' `lastTransferTime[recipient]` remains at the default value: `0`
 
-### Three Critical Locations Where Timers Are Not Set
-
-#### **1) `_mintByTierHub()` — Only Creator Gets Timer**
-
-```solidity
-// Lines 610-618
-_mint(vestingContract, vestingAmount);        // ← Timer NOT set for vesting
-_mint(PLATFORM_1, platform1Share);            // ← Timer NOT set for platforms
-_mint(PLATFORM_2, platform2Share);
-_mint(PLATFORM_3, platform3Share);
-_mint(to, creatorShare);
-lastTransferTime[to] = block.timestamp;       // ← ONLY creator's timer is set
-
-emit DeadMinted(to, tier, amount);
-```
-
-**Impact:** Vesting contract and all 3 platform addresses receive minted tokens but their `lastTransferTime` remains `0`.
-
-#### **2) `mintInitial()` — No Timer Set for Receiver**
-
-```solidity
-// Lines 494-501
-function mintInitial(address _receiver) external onlyOwner nonReentrant {
-    if (_receiver == address(0)) revert ZeroAddress();
-    if (block.chainid != hubChainId) revert OnlyHub();
-    if (initialMinted) revert AlreadyMinted();
-    initialMinted = true;
-    _mint(_receiver, INITIAL_MINT_AMOUNT);
-    // ⚠️ NO timer assignment here - _receiver's lastTransferTime = 0
-    emit InitialMint(_receiver, INITIAL_MINT_AMOUNT);
-}
-```
-
-**Impact:** The initial receiver (typically a treasury) gets 200M tokens with `lastTransferTime = 0`.
-
-#### **3) `_update()` — Mints Fall Through**
-
-```solidity
-// Lines 632-642
-function _update(address from, address to, uint256 value) internal override {
-    super._update(from, to, value);
-
-    if (from != address(0)) {
-        lastTransferTime[from] = block.timestamp;  // ← Skipped for mints
-    }
-}
-```
-
-**Impact:** The `_update` hook is the "last resort" to catch all mints, but it explicitly skips them with the `if (from != address(0))` guard.
-
----
-
 ## Mathematical Vulnerability: Immediate Claimability
 
 ### The Timestamp Math Problem
@@ -185,39 +133,6 @@ uint256 platformAmount = 200M - 100M - 80M = 20M;         // To platforms
 - `burnAddress.balanceOf() += 80M` (tokens destroyed)
 - Platforms receive 20M instead of 0 (actually benefits them)
 
----
-
-## Real-World Scenario: Day-by-Day Timeline
-
-| Time                 | Action                                                             | Effect                                                             |
-| -------------------- | ------------------------------------------------------------------ | ------------------------------------------------------------------ |
-| **Day 1, 00:00 UTC** | Owner calls `mintInitial(treasuryAddr)` with 200M tokens           | `treasuryAddr` receives 200M; `lastTransferTime[treasuryAddr] = 0` |
-| **Day 1, 00:01 UTC** | Attacker (holding 1M tokens) calls `claimIdleTokens(treasuryAddr)` | ✓ Passes all checks; drain executes                                |
-| **Day 1, 00:02 UTC** | Result confirmed on-chain                                          | `treasuryAddr.balanceOf() = 0`; attacker profit = 100M             |
-
-**Another scenario (after tier mint):**
-
-| Time                 | Action                                                                         | Effect                                             |
-| -------------------- | ------------------------------------------------------------------------------ | -------------------------------------------------- |
-| **Day 5, 10:00 UTC** | Tier-1 mint: Creator gets 588,235, Vesting gets 294,118, Platforms get 117,647 | Creator's timer set; Vesting/Platforms' timers = 0 |
-| **Day 5, 10:01 UTC** | Attacker calls `claimIdleTokens(vestingContractAddr)` on 294,118 tokens        | ✓ Passes checks; vesting drained                   |
-| **Day 5, 10:02 UTC** | Result: Attacker receives 147,059 tokens                                       | Vesting balance = 0                                |
-
----
-
-## Why This Is Critical
-
-| Aspect               | Assessment                                                |
-| -------------------- | --------------------------------------------------------- |
-| **Exploitability**   | ✓ Trivial — Single transaction; requires only 1M tokens   |
-| **Permissionless**   | ✓ Yes — Any token holder can execute                      |
-| **Time to exploit**  | ✓ Immediate — First block after mint                      |
-| **Reversibility**    | ✗ No — Tokens burned; funds distributed; cannot be undone |
-| **Loss magnitude**   | ✓ Total — 100% of minted recipient balance                |
-| **Intended victims** | ✓ Vesting/treasury/platform (protected allocations)       |
-| **Preconditions**    | ✓ Minimal — Only requires minimal token balance           |
-
----
 
 ## Proof-of-Concept Code (Foundry Test)
 
@@ -251,23 +166,11 @@ function testImmediateDrainVestingTokens() public {
 }
 ```
 
----
 
-## Impact Severity
-
-**CRITICAL** — This vulnerability enables:
-
-1. **Total loss of vesting allocations** → Breaks token unlock schedule
-2. **Total loss of treasury/initial mint** → Decimates project reserves
-3. **Total loss of platform allocations** → Redirects funds to attacker (though platforms do receive portion)
-4. **Immediate exploitation** → No time window to fix after deployment
-5. **No recovery** → Burned tokens are permanently gone
-
----
 
 ## Recommended Fixes
 
-### **Option A: Set Timer in `_update()` Hook (Comprehensive)**
+### **Option A: Set Timer in `_update()` Hook**
 
 ```solidity
 function _update(
@@ -288,106 +191,6 @@ function _update(
     }
 }
 ```
-
-**Advantages:**
-
-- ✓ Catches all current and future mints in one place
-- ✓ Minimal code change
-- ✓ Consistent timer management
-
----
-
-### **Option B: Explicit Initialization in Each Mint Function (Targeted)**
-
-**In `_mintByTierHub()`:**
-
-```solidity
-_mint(vestingContract, vestingAmount);
-lastTransferTime[vestingContract] = block.timestamp;  // ADD
-
-_mint(PLATFORM_1, platform1Share);
-lastTransferTime[PLATFORM_1] = block.timestamp;      // ADD
-
-_mint(PLATFORM_2, platform2Share);
-lastTransferTime[PLATFORM_2] = block.timestamp;      // ADD
-
-_mint(PLATFORM_3, platform3Share);
-lastTransferTime[PLATFORM_3] = block.timestamp;      // ADD
-
-_mint(to, creatorShare);
-lastTransferTime[to] = block.timestamp;
-```
-
-**In `mintInitial()`:**
-
-```solidity
-_mint(_receiver, INITIAL_MINT_AMOUNT);
-lastTransferTime[_receiver] = block.timestamp;  // ADD
-```
-
-**Advantages:**
-
-- ✓ Explicit and clear
-- ✓ No hook modifications
-
----
-
-### **Option C: Whitelist System Addresses (Defense in Depth)**
-
-```solidity
-function _whitelistSystemAddresses() internal onlyOwner {
-    whiteListedPool[vestingContract] = true;
-    whiteListedPool[PLATFORM_1] = true;
-    whiteListedPool[PLATFORM_2] = true;
-    whiteListedPool[PLATFORM_3] = true;
-}
-
-// Call in constructor or during setup
-```
-
-**Combined with Option A/B, adds extra protection:**
-
-- ✓ Even if timer is somehow 0, these addresses cannot be drained
-- ✓ Semantic: These are system addresses, not normal user wallets
-
----
-
-## Recommended Implementation
-
-**Use Option A (hook) + Option C (whitelist system addresses) for defense in depth:**
-
-1. Fix the root cause in `_update()` to catch all mints
-2. Add system address whitelist as backup protection
-3. Both changes are minimal and have no side effects
-
-````
-
-What goes wrong:
-- When tokens are minted, the contract does NOT start the “idle timer” (`lastTransferTime`) for key recipients:
-  - In `_mintByTierHub`, only the creator’s `lastTransferTime` is set; `vestingContract`, `PLATFORM_1/2/3` are NOT set.
-  - In `mintInitial`, the `_receiver` timer is NOT set.
-- With `lastTransferTime[target] == 0`, the condition `now >= 0 + IDLE_PERIOD` is immediately true on Base today, so those wallets look “idle” from the start.
-- Anyone holding `MIN_CLAIMER_BALANCE` can instantly call `claimIdleTokens(target)` and the contract will process the ENTIRE balance `B`:
-  - 50% to claimer, 40% burned, 10% to platforms (50/30/20).
-
-### Example (Bob on Base — Day 1)
-- Day 1, 00:00 — Owner calls `mintInitial(T)` with `B = 200,000,000`. Timer for `T` is not set (remains 0).
-- Day 1, 00:01 — Bob holds ≥ 1,000,000 tokens and calls `claimIdleTokens(T)`:
-  - Bob receives `0.50·B = 100,000,000`
-  - Burn = `0.40·B = 80,000,000`
-  - Platforms = `0.10·B = 20,000,000` → P1 `10,000,000`, P2 `6,000,000`, P3 `4,000,000`
-  - Treasury `T` ends at `0`
-- The same applies after a tier mint: creator’s timer is set, but vesting/platform wallets’ timers are 0, so they can be drained immediately as above.
-
-### Impact
-- Immediate, permissionless, full drain of vesting/treasury/platform allocations right after minting. Single transaction; no preconditions beyond the claimer balance requirement.
-
-### Recommendations
-- Start timers on mint:
-  - In `_update`, if `from == address(0)`, set `lastTransferTime[to] = block.timestamp` (covers all mints), OR
-  - Explicitly set `lastTransferTime` for `vestingContract` and `PLATFORM_1/2/3` inside `_mintByTierHub`, and for `_receiver` inside `mintInitial`.
-- Optionally, permanently exempt critical system wallets from idle-claim (treat them as whitelisted) for defense in depth.
-
 
 ### 2) Medium — Overpayment beyond fee.nativeFee is trapped
 
