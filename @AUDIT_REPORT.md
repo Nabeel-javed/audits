@@ -192,7 +192,7 @@ function _update(
 }
 ```
 
-### 2) Medium — Overpayment beyond fee.nativeFee is trapped
+## 2) Medium — Overpayment beyond fee.nativeFee is trapped
 
 **Location:** `requestTierMint(...)` (lines 278-305)
 
@@ -217,22 +217,11 @@ if (msg.value < fee.nativeFee) {
 _lzSend(hubEid, payload, options, fee, msg.sender);
 ````
 
-### The Problem: Asymmetric Fee Handling
+### The Problem:
 
 The vulnerability stems from a **mismatch between how fees are checked and how they're refunded**:
 
-#### **Issue 1: One-Way Validation**
-
-```solidity
-if (msg.value < fee.nativeFee) revert InvalidMessageValue(...);
-```
-
-This check:
-
-- ✓ Reverts if `msg.value` is **too low**
-- ✗ Does nothing if `msg.value` is **too high** (allows overpayment)
-
-#### **Issue 2: LayerZero's Refund Recipient**
+#### **Issue: LayerZero's Refund Recipient**
 
 The 5th parameter to `_lzSend` is the `refundAddress`:
 
@@ -248,20 +237,8 @@ In this context:
 - LayerZero will refund any excess to `msg.sender` (the switchbox)
 - The end user has **no way to recover the excess**
 
-#### **Issue 3: Lack of Refund Loop in DeadToken**
 
-The contract does **not implement**:
-
-- A refund function that distributes excess ETH to users
-- A withdrawable balance for overpayments
-- Any mechanism to return overpaid fees
-
----
-
-## Mathematical Example
-
-### Scenario: User Overpays by Accident
-
+### Mathematical Example
 **Assume:**
 
 - LayerZero fee quote: `fee.nativeFee = 0.0523 ETH` (typical fee)
@@ -287,102 +264,14 @@ Step 3: Refund handling
 **Result:**
 
 - Switchbox contract balance increases by 0.0077 ETH
-- If switchbox doesn't implement withdraw logic → ETH stuck forever
 - User permanently loses 0.0077 ETH
 
 ---
 
-## Impact Analysis
-
-| Scenario                        | Probability | Loss per overpayment            | Annual Impact      |
-| ------------------------------- | ----------- | ------------------------------- | ------------------ |
-| User sends 10% extra (common)   | Medium      | 0.00523 ETH (~$20 at $3.8k/ETH) | Recurring per user |
-| User sends 20% extra (confused) | Low         | 0.010460 ETH (~$40)             | Growing pool       |
-| Frontrunning increases fee      | High        | 0.005-0.01 ETH                  | Network dependent  |
-
-**Cumulative effect:** Over thousands of users and transactions, millions in excess fees could accumulate.
-
----
-
-## Root Cause Analysis
-
-### Why This Happens
-
-1. **LayerZero's Design:** The endpoint correctly refunds excess to the address provided
-2. **Contract's Design Flaw:** The refundAddress is `msg.sender` (switchbox), not the originator
-3. **No Intermediate Escrow:** The DeadToken contract doesn't hold or distribute excess fees
-4. **Silent Failure:** No event/revert when overpayment occurs; user doesn't know
-
----
-
-## Proof-of-Concept (Pseudocode)
-
-```solidity
-// User sends overpayment through switchbox
-switchbox.requestTierMint{value: 0.06 ether}(user, childAddr);
-
-// Inside requestTierMint (lines 298-304):
-fee = _quote(...);  // Returns 0.0523 ETH
-if (0.06 < 0.0523) revert;  // ✓ Passes (overpayment allowed)
-
-_lzSend(hubEid, payload, options, fee, msg.sender);
-// msg.sender = switchbox
-// LayerZero refunds (0.06 - 0.0523 = 0.0077) to switchbox
-// switchbox.balanceOf() += 0.0077 (if switchbox doesn't have withdraw)
-// user loses 0.0077 ETH permanently
-
-// User has no way to recover the overpayment
-```
-
----
-
-## Current Code Vulnerability
-
-**Lines 298-304 in full context:**
-
-```solidity
-} else {  // Non-hub chain
-    bytes memory payload = abi.encode(msg.sender, user, creationId);
-    bytes memory options = OptionsBuilder
-        .newOptions()
-        .addExecutorLzReceiveOption(GAS_LIMIT, 0);
-    MessagingFee memory fee = _quote(hubEid, payload, options, false);
-    if (msg.value < fee.nativeFee) {
-        revert InvalidMessageValue(fee.nativeFee, msg.value);
-    }
-    // ⚠️ No check for msg.value == fee.nativeFee or msg.value > fee.nativeFee
-    // ⚠️ Refund address is msg.sender (switchbox), not user (end user)
-
-    _lzSend(hubEid, payload, options, fee, msg.sender);  // Switchbox gets any refund
-}
-```
-
----
 
 ## Recommended Fixes
 
-### **Option A: Enforce Exact Payment (Simplest)**
-
-```solidity
-MessagingFee memory fee = _quote(hubEid, payload, options, false);
-require(msg.value == fee.nativeFee, "Exact fee payment required");
-_lzSend(hubEid, payload, options, fee, msg.sender);
-```
-
-**Advantages:**
-
-- ✓ Prevents overpayment entirely
-- ✓ No complexity; no refund logic needed
-- ✓ User learns they sent wrong amount immediately
-
-**Disadvantages:**
-
-- ✗ Fee quotes can fluctuate; requires UI retry loops
-- ✗ Bad UX: "Try again with exact amount"
-
----
-
-### **Option B: Refund Excess to End User (Better for Users)**
+### **Refund Excess to End User (Better for Users)**
 
 ```solidity
 MessagingFee memory fee = _quote(hubEid, payload, options, false);
