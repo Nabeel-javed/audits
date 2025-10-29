@@ -334,16 +334,6 @@ if (overpayment > 0) {
 - ✓ Allows small slippage for normal conditions
 - ✓ Refunds legitimate excess
 
----
-
-## Recommendation
-
-**Implement Option B** (Refund Excess to End User):
-
-- Change refundAddress from `msg.sender` to `address(this)`
-- Implement refund logic after `_lzSend`
-- Emit event for transparency
-- Already has `nonReentrant` guard, so safe from reentrancy
 
 ### 3) Medium — Idle-claim timer can be indefinitely refreshed via zero-value transfers
 
