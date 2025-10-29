@@ -12,16 +12,12 @@ Audit date: 2025-10-29
 
 ## Findings
 
-### 1) Critical — Immediate drain of platform/vesting/initial-mint allocations via idle-claim due to missing lastTransferTime updates on mint
+### 1) Immediate drain of platform/vesting/initial-mint allocations via idle-claim due to missing lastTransferTime updates on mint
 
 **Location:** `claimIdleTokens(...)`, `_update(...)`, `_mintByTierHub(...)`, `mintInitial(...)`
 
 ### Details
 
-````solidity
----
-
-## Vulnerability Explanation
 
 ### How `lastTransferTime` Is Supposed to Work
 
@@ -34,7 +30,7 @@ The contract uses a mapping `lastTransferTime[address]` to track when each addre
 if (block.timestamp < lastTransferTime[target] + IDLE_PERIOD) {
     revert TokensNotIdleLongEnough();
 }
-````
+```
 
 ### Root Cause: Missing Timer Initialization on Mints
 
