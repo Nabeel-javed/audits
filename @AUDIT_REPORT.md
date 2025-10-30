@@ -61,9 +61,12 @@ This multi-layered approach combines the efficiency of automated tools with the 
 
 ## Findings
 
-### 1) Immediate drain of platform/vesting/initial-mint allocations via idle-claim due to missing lastTransferTime updates on mint
+## 1) Immediate drain of platform/vesting/initial-mint allocations via idle-claim due to missing lastTransferTime updates on mint
 
+**Contract**: `Dead.sol`  
 **Location:** `claimIdleTokens(...)`
+**Severity**: Critical
+
 
 ### Details
 
@@ -185,9 +188,19 @@ function _update(
 }
 ```
 
+
+
+
+
+
+
+
+
 ## 2) Medium — Overpayment beyond fee.nativeFee is trapped
 
-**Location:** `requestTierMint(...)` (lines 278-305)
+**Contract**: `Dead.sol`  
+**Location:** `requestTierMint(...)` 
+**Severity**: Medium
 
 
 ## Vulnerability Explanation
@@ -276,9 +289,9 @@ if (overpayment > 0) {
 
 ### 3) Medium — Idle-claim timer can be indefinitely refreshed via zero-value transfers
 
-**Location:** `_update(...)` (line 632), `transfer()`, `transferFrom()`
-
----
+**Contract**: `Dead.sol`  
+**Location:** `_update(...)`
+**Severity**: Medium
 
 ## Vulnerability Explanation
 
