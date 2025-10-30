@@ -24,6 +24,41 @@ This audit represents a point-in-time assessment. Smart contracts require ongoin
 - Key dependencies: OpenZeppelin, LayerZero OFT/OApp v2
 
 
+## Methodology
+
+This audit was conducted using three-phase approach to ensure thorough coverage of potential vulnerabilities:
+
+### Phase 1: Automated Static Analysis
+
+- Utilized a custom AI-powered bot for initial vulnerability detection
+- Performed automated static analysis to quickly identify common security patterns and potential issues
+
+### Phase 2: Invariant Testing
+
+- Conducted systematic testing to verify that all contract invariants remain intact
+- Validated core business logic and security assumptions
+- Ensured that fundamental contract properties hold under various conditions
+
+### Phase 3: Manual Code Review
+
+- Performed deep manual analysis of the entire code
+- Identified vulnerabilities that automated tools miss
+- Validated findings from previous phases and discovered additional issues
+
+This multi-layered approach combines the efficiency of automated tools with the thoroughness of manual review, ensuring comprehensive coverage of both common and sophisticated vulnerabilities.
+
+---
+
+## Executive Summary
+
+### Total Issues Found: 5
+
+- 1 CRITICAL severity issue
+- 2 MEDIUM severity issues
+- 2 GAS Related issues
+
+---
+
 ## Findings
 
 ### 1) Immediate drain of platform/vesting/initial-mint allocations via idle-claim due to missing lastTransferTime updates on mint
