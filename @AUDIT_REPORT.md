@@ -14,7 +14,6 @@ This audit represents a point-in-time assessment. Smart contracts require ongoin
   - [2) Medium — Overpayment beyond fee.nativeFee is trapped](#2-medium--overpayment-beyond-feenativefee-is-trapped)
   - [3) Medium — Idle-claim timer can be indefinitely refreshed via zero-value transfers](#3-medium--idle-claim-timer-can-be-indefinitely-refreshed-via-zero-value-transfers)
   - [4. [GAS] Nesting if-statements is cheaper than using &&](#4-gas-nesting-if-statements-is-cheaper-than-using-)
-  - [5. [GAS] Reduce gas usage by moving to Solidity 0.8.19 or later](#5-gas-reduce-gas-usage-by-moving-to-solidity-0819-or-later)
 
 
 ## Scope and Context
@@ -51,11 +50,11 @@ This multi-layered approach combines the efficiency of automated tools with the 
 
 ## Executive Summary
 
-### Total Issues Found: 5
+### Total Issues Found: 4
 
 - 1 CRITICAL severity issue
 - 2 MEDIUM severity issues
-- 2 GAS Related issues
+- 1 GAS Related issues
 
 ---
 
@@ -426,14 +425,7 @@ function _update(
 Nesting if-statements avoids the stack operations of setting up and using an extra jumpdest, and saves 6 [gas](https://gist.github.com/IllIllI000/7f3b818abecfadbef93b894481ae7d19)
 
 
-### 5. [GAS] Reduce gas usage by moving to Solidity 0.8.19 or later
 
-**Contract**: `Dead.sol`  
-**Severity**: GAS
-
-#### Description:
-
-Solidity version 0.8.19 introduced a number of gas optimizations, refer to the [Solidity 0.8.19 Release Announcement](https://soliditylang.org/blog/2023/02/22/solidity-0.8.19-release-announcement) for details.
 
 
 
