@@ -3,7 +3,14 @@
 
 ## Executive Summary
 
-The `OracleManager` contract is a multi-oracle price aggregator that fetches token prices from Chainlink, Pyth, and Uniswap V3 with fallback logic. The audit identified **1 High** and **3 Medium** severity issues related to price manipulation, stale data, and configuration logic flaws.
+This audit covers two core contracts in the DeadToken protocol:
+
+**1. OracleManager Contract**
+A multi-oracle price aggregator that fetches token prices from Chainlink, Pyth, and Uniswap V3 with fallback logic. The audit identified **1 High** and **6 Medium** severity issues related to price manipulation, stale data, and configuration logic flaws. The most critical finding is the use of Uniswap V3's `slot0()` spot price, which is trivially manipulatable via flash loans.
+
+**2. USDeAD Token Contract**
+An OFT (Omnichain Fungible Token) stablecoin built on LayerZero for cross-chain transfers. The token has owner-controlled mint/burn functions designed for CDP (Collateralized Debt Position) operations. **No critical or medium severity issues were identified.** The contract is straightforward with only minor informational findings related to redundant checks and code clarity.
+
 
 
 ### Disclaimer
@@ -21,12 +28,10 @@ This audit represents a point-in-time assessment. Smart contracts require ongoin
   - [M-01: Missing Staleness Check on ETH/USD Chainlink Feed](#m-01-missing-staleness-check-on-ethusd-chainlink-feed)
   - [M-02: uniswapIsToken0 Configuration Parameter Is Never Used](#m-02-uniswapIstoken0-configuration-parameter-is-never-used)
   - [M-03: chainlinkIsEthBased Flag Incorrectly Applied to Uniswap Price](#m-03-chainlinkisethbased-flag-incorrectly-applied-to-uniswap-price)
-  - [M-08: Pyth getPriceUnsafe Doesn't Validate Price Authenticity](#m-08-pyth-getpriceunsafe-doesnt-validate-price-authenticity)
-  - [M-09: Chainlink roundId Not Validated](#m-09-chainlink-roundid-not-validated)
-  - [M-10: No Confidence Interval Check for Pyth Prices](#m-10-no-confidence-interval-check-for-pyth-prices)
+  - [M-04: Pyth getPriceUnsafe Doesn't Validate Price Authenticity](#m-08-pyth-getpriceunsafe-doesnt-validate-price-authenticity)
+  - [M-05: Chainlink roundId Not Validated](#m-09-chainlink-roundid-not-validated)
+  - [M-06: No Confidence Interval Check for Pyth Prices](#m-10-no-confidence-interval-check-for-pyth-prices)
 - [Informational / Low Severity](#informational--low-severity-not-detailed)
-
-
 
 
 
