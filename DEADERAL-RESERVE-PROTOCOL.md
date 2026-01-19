@@ -18,8 +18,15 @@ This audit represents a point-in-time assessment. Smart contracts require ongoin
 - [Findings](#findings)
   - [1) High - Uniswap V3 `slot0()` Price Is Manipulatable via Flash Loans]()
   - [2) Medium — Missing Staleness Check on ETH/USD Chainlink Feed]()
-  - [3) Medium — `uniswapIsToken0` Configuration Parameter Is Never Used](#3-medium--idle-claim-timer-can-be-indefinitely-refreshed-via-zero-value-transfers)
-  - [4. [GAS] Nesting if-statements is cheaper than using &&](#4-gas-nesting-if-statements-is-cheaper-than-using-)
+  - [3) Medium — `uniswapIsToken0` Configuration Parameter Is Never Used]()
+  - [4) Medium — `chainlinkIsEthBased` Flag Incorrectly Applied to Uniswap Price]()
+  - [4) Medium — Pyth `getPriceUnsafe` Doesn't Validate Price Authenticity]()
+  - [5) Medium — Chainlink `roundId` Not Validated]()
+  - [6) Medium — No Confidence Interval Check for Pyth Prices]()
+  - [7) Medium — Chainlink `roundId` Not Validated]()
+
+
+
 
 
 ## Scope and Context
