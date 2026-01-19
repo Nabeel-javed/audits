@@ -71,6 +71,7 @@ This multi-layered approach combines the efficiency of automated tools with the 
 ### [H-01] Uniswap V3 `slot0()` Price Is Manipulatable via Flash Loans
 
 **Severity:** High
+
 **Location:** [OracleManager.sol:162-174](OracleManager.sol#L162-L174)
 
 **Description:**
@@ -116,6 +117,7 @@ A TWAP interval of 30 minutes is generally recommended to resist manipulation.
 ### [M-01] Missing Staleness Check on ETH/USD Chainlink Feed
 
 **Severity:** Medium
+
 **Location:** [OracleManager.sol:216-228](OracleManager.sol#L216-L228)
 
 **Description:**
@@ -164,6 +166,7 @@ function _getEthUsdPriceInternal() internal view returns (uint256) {
 ### [M-02] `uniswapIsToken0` Configuration Parameter Is Never Used
 
 **Severity:** Medium
+
 **Location:** [OracleManager.sol:44](OracleManager.sol#L44), [OracleManager.sol:183-184](OracleManager.sol#L183-L184)
 
 **Description:**
@@ -206,6 +209,7 @@ function _getUniswapPriceRaw(
 ### [M-03] `chainlinkIsEthBased` Flag Incorrectly Applied to Uniswap Price
 
 **Severity:** Medium
+
 **Location:** [OracleManager.sol:145-149](OracleManager.sol#L145-L149)
 
 **Description:**
@@ -253,6 +257,7 @@ struct TokenOracleConfig {
 ### [M-08] Pyth `getPriceUnsafe` Doesn't Validate Price Authenticity
 
 **Severity:** Medium
+
 **Location:** [OracleManager.sol:112](OracleManager.sol#L112)
 
 **Description:**
@@ -280,6 +285,7 @@ try pyth.getPriceNoOlderThan(cfg.pythId, threshold) returns (IPyth.Price memory 
 ### [M-09] Chainlink `roundId` Not Validated
 
 **Severity:** Medium
+
 **Location:** [OracleManager.sol:85-91](OracleManager.sol#L85-L91)
 
 **Description:**
@@ -322,6 +328,7 @@ try cfg.chainlinkFeed.latestRoundData() returns (
 ### [M-10] No Confidence Interval Check for Pyth Prices
 
 **Severity:** Medium
+
 **Location:** [OracleManager.sol:112-133](OracleManager.sol#L112-L133)
 
 **Description:**
