@@ -72,7 +72,7 @@ This multi-layered approach combines the efficiency of automated tools with the 
 
 **Severity:** High
 
-**Location:** [OracleManager.sol:162-174](OracleManager.sol#L162-L174)
+**Location:** [OracleManager.sol:162-174](https://github.com/SwitchDapp/DEADERAL-RESERVE-PROTOCOL/blob/main/src/oracle/OracleManager.sol#L162-L174)
 
 **Description:**
 The `_getUniswapPriceRaw()` function uses `slot0()` to fetch the current spot price from Uniswap V3. This price represents the **instantaneous** price at the current block and can be trivially manipulated using flash loans.
@@ -118,7 +118,7 @@ A TWAP interval of 30 minutes is generally recommended to resist manipulation.
 
 **Severity:** Medium
 
-**Location:** [OracleManager.sol:216-228](OracleManager.sol#L216-L228)
+**Location:** [OracleManager.sol:216-228](https://github.com/SwitchDapp/DEADERAL-RESERVE-PROTOCOL/blob/main/src/oracle/OracleManager.sol#L216-L228)
 
 **Description:**
 The `_getEthUsdPriceInternal()` function does NOT check if the ETH/USD price is stale, unlike `_getChainlinkPriceInternal()` which properly validates `block.timestamp - updatedAt < 1 hours`.
@@ -167,7 +167,7 @@ function _getEthUsdPriceInternal() internal view returns (uint256) {
 
 **Severity:** Medium
 
-**Location:** [OracleManager.sol:44](OracleManager.sol#L44), [OracleManager.sol:183-184](OracleManager.sol#L183-L184)
+**Location:** [OracleManager.sol:44](https://github.com/SwitchDapp/DEADERAL-RESERVE-PROTOCOL/blob/main/src/oracle/OracleManager.sol#L44), [OracleManager.sol:183-184](https://github.com/SwitchDapp/DEADERAL-RESERVE-PROTOCOL/blob/main/src/oracle/OracleManager.sol#L183-L184)
 
 **Description:**
 The `TokenOracleConfig` struct contains a `uniswapIsToken0` field that is set via `setTokenConfig()`, but this value is **never read**. Instead, `_getUniswapPriceRaw()` dynamically determines `isToken0` by comparing addresses:
@@ -210,7 +210,7 @@ function _getUniswapPriceRaw(
 
 **Severity:** Medium
 
-**Location:** [OracleManager.sol:145-149](OracleManager.sol#L145-L149)
+**Location:** [OracleManager.sol:145-149](https://github.com/SwitchDapp/DEADERAL-RESERVE-PROTOCOL/blob/main/src/oracle/OracleManager.sol#L145-L149)
 
 **Description:**
 The `_getUniswapPriceInternal()` function reuses `cfg.chainlinkIsEthBased` to determine whether to multiply the Uniswap price by ETH/USD:
@@ -258,7 +258,7 @@ struct TokenOracleConfig {
 
 **Severity:** Medium
 
-**Location:** [OracleManager.sol:112](OracleManager.sol#L112)
+**Location:** [OracleManager.sol:112](https://github.com/SwitchDapp/DEADERAL-RESERVE-PROTOCOL/blob/main/src/oracle/OracleManager.sol#L112)
 
 **Description:**
 The contract uses `getPriceUnsafe()` which, per Pyth documentation, returns the price **without verifying** that it has been properly updated on-chain:
@@ -286,7 +286,7 @@ try pyth.getPriceNoOlderThan(cfg.pythId, threshold) returns (IPyth.Price memory 
 
 **Severity:** Medium
 
-**Location:** [OracleManager.sol:85-91](OracleManager.sol#L85-L91)
+**Location:** [OracleManager.sol:85-91](https://github.com/SwitchDapp/DEADERAL-RESERVE-PROTOCOL/blob/main/src/oracle/OracleManager.sol#L85-L91)
 
 **Description:**
 The contract ignores `roundId` from Chainlink's response:
@@ -329,7 +329,7 @@ try cfg.chainlinkFeed.latestRoundData() returns (
 
 **Severity:** Medium
 
-**Location:** [OracleManager.sol:112-133](OracleManager.sol#L112-L133)
+**Location:** [OracleManager.sol:112-133](https://github.com/SwitchDapp/DEADERAL-RESERVE-PROTOCOL/blob/main/src/oracle/OracleManager.sol#L112-L133)
 
 **Description:**
 Pyth provides a confidence interval (`conf`) with each price, representing the uncertainty range. The contract ignores this:
