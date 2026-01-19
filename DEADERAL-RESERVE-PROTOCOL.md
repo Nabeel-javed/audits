@@ -15,15 +15,16 @@ This audit represents a point-in-time assessment. Smart contracts require ongoin
 
 - [Disclaimer](#disclaimer)
 - [Scope and Context](#scope-and-context)
+- [Methodology](#methodology)
 - [Findings](#findings)
-  - [1) High - Uniswap V3 `slot0()` Price Is Manipulatable via Flash Loans]()
-  - [2) Medium — Missing Staleness Check on ETH/USD Chainlink Feed]()
-  - [3) Medium — `uniswapIsToken0` Configuration Parameter Is Never Used]()
-  - [4) Medium — `chainlinkIsEthBased` Flag Incorrectly Applied to Uniswap Price]()
-  - [4) Medium — Pyth `getPriceUnsafe` Doesn't Validate Price Authenticity]()
-  - [5) Medium — Chainlink `roundId` Not Validated]()
-  - [6) Medium — No Confidence Interval Check for Pyth Prices]()
-  - [7) Medium — Chainlink `roundId` Not Validated]()
+  - [H-01: Uniswap V3 slot0() Price Is Manipulatable via Flash Loans](#h-01-uniswap-v3-slot0-price-is-manipulatable-via-flash-loans)
+  - [M-01: Missing Staleness Check on ETH/USD Chainlink Feed](#m-01-missing-staleness-check-on-ethusd-chainlink-feed)
+  - [M-02: uniswapIsToken0 Configuration Parameter Is Never Used](#m-02-uniswapIstoken0-configuration-parameter-is-never-used)
+  - [M-03: chainlinkIsEthBased Flag Incorrectly Applied to Uniswap Price](#m-03-chainlinkisethbased-flag-incorrectly-applied-to-uniswap-price)
+  - [M-08: Pyth getPriceUnsafe Doesn't Validate Price Authenticity](#m-08-pyth-getpriceunsafe-doesnt-validate-price-authenticity)
+  - [M-09: Chainlink roundId Not Validated](#m-09-chainlink-roundid-not-validated)
+  - [M-10: No Confidence Interval Check for Pyth Prices](#m-10-no-confidence-interval-check-for-pyth-prices)
+- [Informational / Low Severity](#informational--low-severity-not-detailed)
 
 
 
