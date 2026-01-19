@@ -16,9 +16,9 @@ This audit represents a point-in-time assessment. Smart contracts require ongoin
 - [Disclaimer](#disclaimer)
 - [Scope and Context](#scope-and-context)
 - [Findings](#findings)
-  - [1) Immediate drain of platform/vesting/initial-mint allocations via idle-claim due to missing lastTransferTime updates on mint](#1-immediate-drain-of-platformvestinginitial-mint-allocations-via-idle-claim-due-to-missing-lasttransfertime-updates-on-mint)
-  - [2) Medium — Overpayment beyond fee.nativeFee is trapped](#2-medium--overpayment-beyond-feenativefee-is-trapped)
-  - [3) Medium — Idle-claim timer can be indefinitely refreshed via zero-value transfers](#3-medium--idle-claim-timer-can-be-indefinitely-refreshed-via-zero-value-transfers)
+  - [1) High - Uniswap V3 `slot0()` Price Is Manipulatable via Flash Loans]()
+  - [2) Medium — Missing Staleness Check on ETH/USD Chainlink Feed]()
+  - [3) Medium — `uniswapIsToken0` Configuration Parameter Is Never Used](#3-medium--idle-claim-timer-can-be-indefinitely-refreshed-via-zero-value-transfers)
   - [4. [GAS] Nesting if-statements is cheaper than using &&](#4-gas-nesting-if-statements-is-cheaper-than-using-)
 
 
